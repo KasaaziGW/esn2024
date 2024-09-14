@@ -1,30 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+  <%- include('templates/head') %>  
+  <title>Login</title>
 </head>
 <body>
-    <header>
-    <strong>
-        <p>Emergency Social Network [ESN] - 2024</p>
-    </strong>
-    </header>
-    <main>
-        <div>Login Page</div>
-        <form method="POST" action="">
-            <input type="email" name="email" placeholder="Enter your email here" required>
-            <input type="password" name="password" placeholder="Enter your password here" required>
-            <input type="submit" name="submit">
-        </form>
+    <%- include('templates/header') %>      
+    <main class="container">
+        <div class="wrapper fadeInDown">
+            <div class="formContent">
+                <div>
+                    <img src="images/login.png" id="icon" alt="User icon">
+                </div>
+                <form method="POST" action="#">
+                        <input type="email" name="email" required placeholder="Enter your email here." autocomplete="off">
+                        <input type="password" name="password" required placeholder="Enter your password here">
+                        <input type="submit" name="submit">
+                </form>
+                
+                <div class="formFooter">
+                    <a class="underlineHover" href="/register">New Account? Sign Up.</a>
+                </div>
+            </div>
+        </div>
     </main>
-    <footer>
-        <strong>
-            <p>
-                Advanced Web System Development and Web Services &copy; MIS2024
-            </p>
-        </strong>
-    </footer>
+    <%- include('templates/footer') %>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>
