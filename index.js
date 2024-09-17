@@ -1,5 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const flashMessages = require("connect-flash");
+const sessions = require("express-session");
 const mongoose = require("mongoose");
 
 const PORT = 3300; // the port where our server will be running
@@ -7,7 +9,24 @@ const PORT = 3300; // the port where our server will be running
 // instantiating express
 const app = express();
 app.use(express.static("public")); // points to where the static files are.
-// set up the body-parse utility
+
+// setting up the session
+app.use(
+  sessions({
+    secret: "esn2024",
+    cookie: { maxAge: 60000 },
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+app.use(flashMessages());
+// setting up a middleware to send all flash messages
+app.use(function (request, response, next) {
+  response.locals.message = request.flash();
+  next();
+});
+
+// set up the body-parser utility
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // setting the templating engine
@@ -45,10 +64,17 @@ app.post("/userRegister", (request, response) => {
   let fullname = request.body.fullname;
   let pswd = request.body.password;
   let cpswd = request.body.confirmpassword;
-  response.send(
-    `Email: ${email}\nFullname: ${fullname}\nPassword: ${pswd}\nPassword 2: ${cpswd}`
-  );
-  // response.send("Email " + email + " ");
+
+  if (pswd != cpswd) {
+    request.flash("error", "Entered passwords do not match! Please try again.");
+    response.redirect("/register");
+  } else {
+    request.flash("success", "This is the next thing on the agenda.");
+    response.redirect("/register");
+  }
+  // response.send(
+  //   `Email: ${email}\nFullname: ${fullname}\nPassword: ${pswd}\nPassword 2: ${cpswd}`
+  // );
 });
 // listen for incoming connections
 app.listen(PORT, () => {
