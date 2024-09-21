@@ -12,6 +12,8 @@
                 <div>
                     <img src="images/login.png" id="icon" alt="User icon">
                 </div>
+                <%- include('templates/errors') %>
+                <%- include('templates/success') %>
                 <form method="POST" action="/processLogin">
                         <input type="email" name="email" required placeholder="Enter your email here." autocomplete="off">
                         <input type="password" name="password" required placeholder="Enter your password here">

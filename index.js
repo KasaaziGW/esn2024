@@ -48,6 +48,9 @@ try {
   // handleError(error);
   console.log(`Couldn't connect to MongoDB\n${error}`);
 }
+
+// creating global variables for easy access to the data they hold
+var session, uname;
 // loading the login page
 app.get("/", (request, response) => {
   response.render("login");
@@ -76,18 +79,36 @@ app.post("/userRegister", (request, response) => {
     Citizen.findOne({ username: email }).then((user) => {
       if (user) {
         request.flash(
-          "error"`${user.fullname} already exists! Please try again!`
+          "error",
+          `${user.fullname} already exists! Please try again!`
         );
+        response.redirect("/register");
       } else {
-        // create account
+        // creating the account
         // encrypt the password
+        bcrypt.hash(pswd, 10, async (err, hashedPassword) => {
+          if (err) {
+            request.flash("error", `Error while hashing the password ${err}!`);
+            response.redirect("/register");
+          } else {
+            // create a model to save the data
+            let citizen = new Citizen({
+              username: email,
+              fullname: fullname,
+              password: hashedPassword,
+            });
+            // saving the data
+            await citizen.save();
+            request.flash(
+              "success",
+              `${fullname} successfully added to the system.\nPlease login with your new credentials.`
+            );
+            response.redirect("/");
+          }
+        });
       }
-      response.redirect("/register");
     });
   }
-  // response.send(
-  //   `Email: ${email}\nFullname: ${fullname}\nPassword: ${pswd}\nPassword 2: ${cpswd}`
-  // );
 });
 
 // logging in a user
@@ -106,7 +127,47 @@ app.post("/processLogin", (request, response) => {
     );
     response.redirect("/");
   }
-  response.send(`Email: ${email}, Password: ${pswd}`);
+  // check if the user exists
+  Citizen.findOne({ username: email })
+    .then((userInfo) => {
+      if (userInfo) {
+        // the user exists, check the password
+        const hashedPassword = userInfo.password;
+        bcrypt.compare(pswd, hashedPassword).then((result) => {
+          if (result) {
+            session = request.session;
+            session.uid = userInfo.username;
+            session.fname = userInfo.fullname;
+            // request.flash("success", "You have logged in successfully.");
+            response.redirect("/home");
+          } else {
+            request.flash("error", "Invalid Username/Password combination!");
+            response.redirect("/");
+          }
+        });
+      } else {
+        request.flash("error", "Citizen not found in the system!");
+        response.redirect("/");
+      }
+    })
+    .catch((err) => {
+      request.flash("error", `Error while logging in! \n${err}`);
+      response.redirect("/");
+    });
+});
+
+// loading the dashboard
+app.get("/home", (request, response) => {
+  if (session.uid && session.fname) {
+    response.render("dashboard", {
+      data: {
+        userid: session.uid,
+        fullname: session.fname,
+      },
+    });
+  } else {
+    response.redirect("/");
+  }
 });
 // listen for incoming connections
 app.listen(PORT, () => {
