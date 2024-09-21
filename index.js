@@ -3,7 +3,8 @@ const bodyParser = require("body-parser");
 const flashMessages = require("connect-flash");
 const sessions = require("express-session");
 const mongoose = require("mongoose");
-
+const { Citizen } = require("./models/Citizen");
+const bcrypt = require("bcryptjs");
 const PORT = 3300; // the port where our server will be running
 
 // instantiating express
@@ -69,12 +70,43 @@ app.post("/userRegister", (request, response) => {
     request.flash("error", "Entered passwords do not match! Please try again.");
     response.redirect("/register");
   } else {
-    request.flash("success", "This is the next thing on the agenda.");
-    response.redirect("/register");
+    // request.flash("success", "This is the next thing on the agenda.");
+    // response.redirect("/register");
+    // testing that the account does not exist
+    Citizen.findOne({ username: email }).then((user) => {
+      if (user) {
+        request.flash(
+          "error"`${user.fullname} already exists! Please try again!`
+        );
+      } else {
+        // create account
+        // encrypt the password
+      }
+      response.redirect("/register");
+    });
   }
   // response.send(
   //   `Email: ${email}\nFullname: ${fullname}\nPassword: ${pswd}\nPassword 2: ${cpswd}`
   // );
+});
+
+// logging in a user
+app.post("/processLogin", (request, response) => {
+  // getting the data from the user
+  let email = request.body.email;
+  let pswd = request.body.password;
+  if (email === "") {
+    request.flash("error", "The email field must be filled! Please try again.");
+    response.redirect("/");
+  }
+  if (pswd === "") {
+    request.flash(
+      "error",
+      "The password field must be filled too! Please try again."
+    );
+    response.redirect("/");
+  }
+  response.send(`Email: ${email}, Password: ${pswd}`);
 });
 // listen for incoming connections
 app.listen(PORT, () => {

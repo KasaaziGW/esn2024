@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -18,13 +19,13 @@
   },
   "homepage": "https://github.com/KasaaziGW/esn2024#readme",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
     "connect-flash": "^0.1.1",
     "ejs": "^3.1.10",
     "express": "^4.20.0",
     "express-session": "^1.18.0",
     "mongodb": "^6.9.0",
-    "mongoose": "^8.6.2",
-    "nodemon": "^3.1.4"
+    "mongoose": "^8.6.2"
   }
 }
