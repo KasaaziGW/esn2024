@@ -25,7 +25,7 @@ body {
     white-space: nowrap;
     width: 0;
     animation: typing;
-    animation-duration: 2.5s;
+    animation-duration: 1.5s;
     animation-timing-function: steps(30, end);
     animation-fill-mode: forwards;
 }
@@ -197,3 +197,71 @@ input[type=password]:placeholder {
     }
 }
 /* Animation ends here */
+#content
+{
+    width: 100%;
+    margin-left: -16px;
+    margin-top: -6px;
+    height: 490px;
+}
+#citizen
+{
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    background-color: #32c5ff;
+    color: white;
+    width: 100%;
+    height: fit-content;
+}
+#nickname
+{
+    font-weight: bold;
+    display: inline-block;
+}
+#messages
+{
+    width: 80.5%;
+    height: 400px;
+    overflow: auto;
+    /* background-color: #f1f1f1; */
+    padding: 5px;
+}
+#alert{
+    width: 80.5%;
+    height: fit-content;
+}
+#messageContainer{
+    float: left;
+    width: 50%;
+    word-wrap: break-word;
+    background-color: #d4d0e5;
+    border-radius: 15px;
+    padding: 5px;
+    margin: 5px;
+}
+#messageContainer1{
+    float: right;
+    width: 50%;
+    word-wrap: break-word;
+    background-color: #d4d0e5;
+    border-radius: 15px;
+    padding: 5px;
+    margin: 5px;
+}
+#messageHeader{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: fit-content;
+    border-bottom: 1px solid #211245;
+}
+#senderName{
+    font-size: 18px;
+    font-weight: 600;
+}
+
+#sentTime{
+    font-size: 14px;
+    font-weight: 300;
+}

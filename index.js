@@ -169,6 +169,28 @@ app.get("/home", (request, response) => {
     response.redirect("/");
   }
 });
+
+//loading the chatroom
+app.get("/chatroom", (request, response) => {
+  session = request.session;
+  // uname = request.session.fullname;
+  if (session.uid && session.fname) {
+    response.render("chatroom", {
+      data: {
+        userid: session.uid,
+        fullname: session.fname,
+      },
+    });
+  } else response.redirect("/");
+});
+
+// logging the user out
+app.get("/logout", (request, response) => {
+  request.session.destroy();
+  session = "";
+  response.redirect("/");
+});
+
 // listen for incoming connections
 app.listen(PORT, () => {
   console.log(`The server is up and running on port ${PORT}`);
