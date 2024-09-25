@@ -4,11 +4,14 @@ const flashMessages = require("connect-flash");
 const sessions = require("express-session");
 const mongoose = require("mongoose");
 const { Citizen } = require("./models/Citizen");
+const { Message } = require("./models/Message");
 const bcrypt = require("bcryptjs");
 const PORT = 3300; // the port where our server will be running
 
 // instantiating express
 const app = express();
+const httpServer = require("http").Server(app);
+const socketIO = require("socket.io")(httpServer);
 app.use(express.static("public")); // points to where the static files are.
 
 // setting up the session
@@ -138,6 +141,7 @@ app.post("/processLogin", (request, response) => {
             session = request.session;
             session.uid = userInfo.username;
             session.fname = userInfo.fullname;
+            uname = userInfo.fullname;
             // request.flash("success", "You have logged in successfully.");
             response.redirect("/home");
           } else {
@@ -191,7 +195,19 @@ app.get("/logout", (request, response) => {
   response.redirect("/");
 });
 
+// saving the message to the database
+app.post("/saveMessage", async (request, response) => {
+  // create an object from the model
+  var message = new Message(request.body);
+  await message.save();
+  // to be done
+});
+// receiving and emit a message when a user joins the chat
+socketIO.on("connection", (socket) => {
+  socketIO.emit("joined", uname);
+  console.log(`${uname} has joined the chat.`);
+});
 // listen for incoming connections
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`The server is up and running on port ${PORT}`);
 });
