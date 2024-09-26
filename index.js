@@ -200,8 +200,19 @@ app.post("/saveMessage", async (request, response) => {
   // create an object from the model
   var message = new Message(request.body);
   await message.save();
-  // to be done
+  // emit an event to the front end for displaying a sent message
+  socketIO.emit("message", message);
+  response.sendStatus(200);
 });
+
+// fetching the messages from the database
+app.get("/fetchMessages", async (request, response) => {
+  await Message.find({}).then((messages) => {
+    if (messages) response.send(messages);
+    else console.log(`Error while fetching messages!`);
+  });
+});
+
 // receiving and emit a message when a user joins the chat
 socketIO.on("connection", (socket) => {
   socketIO.emit("joined", uname);

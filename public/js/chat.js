@@ -5,7 +5,7 @@ $(() => {
     var sentMessage = $("#sendMessage").val();
     var currentTime = getCurrentTime();
     // alert(
-    //   `Fullname: ${fullname} \nMessage: ${sentMessage} \nTime 'n Date: ${currentDate}`
+    //   `Fullname: ${fullname} \nMessage: ${sentMessage} \nTime 'n Date: ${currentTime}`
     // );
     var message = {
       sender: fullname,
@@ -15,6 +15,7 @@ $(() => {
     saveMessage(message); // delegating the message to be sent by the saveMessage function
     $("#sendMessage").val(""); // clearing the text box after sending the message
   });
+  getMessages();
 
   socket.on("joined", (username) => {
     var fullname = document.querySelector("#fullname").textContent;
@@ -35,6 +36,38 @@ $(() => {
   });
 });
 
+// displaying messages on the UI
+function getMessages() {
+  $.get("http://localhost:3300/fetchMessages", (messages) => {
+    messages.forEach(displayMessage);
+  });
+  scrollContainer();
+}
+
+// listening to the "message" event
+socket.on("message", displayMessage);
+// function for diplaying the message on the screen
+function displayMessage(message) {
+  var fullname = document.querySelector("#fullname").textContent;
+  if (message.sender == fullname) {
+    $("#messages").append(`<div id="messageContainer1">
+                              <div id="messageHeader">
+                              <div id="senderName">Me</div>
+                              <div id="sentTime">${message.sentTime}</div>
+                              </div>
+                              <p>${message.message}</p>
+                              </div>`);
+  } else {
+    $("#messages").append(`<div id="messageContainer">
+                              <div id="messageHeader">
+                              <div id="senderName">${message.sender}</div>
+                              <div id="sentTime">${message.sentTime}</div>
+                              </div>
+                              <p>${message.message}</p>
+                              </div>`);
+  }
+  scrollContainer();
+}
 // function to get the current date and time
 function getCurrentTime() {
   var today = new Date();
