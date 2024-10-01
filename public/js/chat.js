@@ -1,7 +1,9 @@
 const socket = io();
+const typingDiv = document.querySelector('#typing');
 $(() => {
   $("#sendButton").click(() => {
     var fullname = document.querySelector("#fullname").textContent;
+    // used the value method to get form inputs
     var sentMessage = $("#sendMessage").val();
     var currentTime = getCurrentTime();
     // alert(
@@ -33,6 +35,20 @@ $(() => {
       );
     }
     scrollContainer();
+  });
+  // When the user presses a key in the input box, the typing event is emitted.
+  sentMessage.addEventListener('keypress', () => {
+    socket.emit('typing', { username: 'fullname' });
+  });
+
+  // Listen for typing event from other users
+  // Update the typing indicator
+  socket.on('typing', (data) => {
+    typingDiv.innerText = `${data.username} is typing...`;
+  });
+   // Clear the typing indicator
+  socket.on('stop typing', () => {
+    typingDiv.innerText = ''; 
   });
 });
 
