@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('templates/head'); %>
+    <title>searchinfo</title>
+</head>
+<body>
+    <%- include('templates/header'); %>
+    <main class="d-flex flex-nowrap" style="height:500px;">
+        <%- include('templates/nav'); %>
+        <div class="d-flex flex-column flex-shrink-0 p-3" style="width: 100%;">          
+            <div class="search-container">
+                <h2>Search Information</h2>
+                <form id="search-form" action="" method="POST">
+                    <label for="search-criteria">Enter Search Criteria:</label>
+                    <input type="text" id="search-criteria" name="searchCriteria" placeholder="Enter name, ID, or keyword" required>
+                    <button type="submit" class="search-button">Search</button>
+                </form>
+                <!-- Area for displaying search results -->
+                <div id="search-results" class="results-container">
+                    <h3>Results:</h3>
+                    <ul id="results-list"></ul> <!-- Search results will be appended here -->
+                </div>
+            </div>
+        </div>
+        
+    </main>
+    <%- include('templates/footer'); %>
+    <script src="js/chat.js"></script>
+</body>
+</html>

@@ -160,6 +160,30 @@ app.post("/processLogin", (request, response) => {
     });
 });
 
+// Event for triggering user is typing
+socketIO.on('connection', (socket)=>{
+  /*from server side we will emit 'display' event once the user starts typing
+  so that on the client side we can capture this event and display 
+  '<data.user> is typing...' */
+  socket.on('typing', (data)=>{
+    if(data.typing==true)
+       socketIO.emit('display', data)
+    else
+       socketIO.emit('display', data)
+  });
+}); 
+
+// loading the searchinfo page
+app.get("/searchinfo", (request, response) => {
+  response.render("searchinfo");
+});
+
+// loading the sharestatus page
+app.get("/sharestatus", (request, response) => {
+  response.render("sharestatus");
+});
+
+
 // loading the dashboard
 app.get("/home", (request, response) => {
   if (session.uid && session.fname) {
@@ -186,28 +210,6 @@ app.get("/chatroom", (request, response) => {
       },
     });
   } else response.redirect("/");
-});
-
-
-// implementation for handling the "typing" event in a chat
-// An event handler provided by Socket.IO that triggers when a new client connects to the server.
-// When a new client (user) connects to the server, this callback function is executed.
-io.on('connection', (socket) => {
-  console.log('A user connected');
-
-  // Listen for 'typing' event
-  // This listens for a 'typing' event from the connected client.When a user types a message, the client emits a 'typing' event to the server
-  socket.on('typing', (data) => {
-    socket.broadcast.emit('typing', data); // This line broadcasts the 'typing' event to all other connected clients except the one who sent it.
-  });
-// This listens for a 'stop typing' event from the connected client.
-  socket.on('stop typing', () => {
-    socket.broadcast.emit('stop typing');
-  });
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
-  });
 });
 
 // logging the user out
@@ -240,6 +242,8 @@ socketIO.on("connection", (socket) => {
   socketIO.emit("joined", uname);
   console.log(`${uname} has joined the chat.`);
 });
+
+
 // listen for incoming connections
 httpServer.listen(PORT, () => {
   console.log(`The server is up and running on port ${PORT}`);

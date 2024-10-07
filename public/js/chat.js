@@ -1,5 +1,7 @@
 const socket = io();
-const typingDiv = document.querySelector('#typing');
+var typing=false;
+var timeout=undefined;
+var user;
 $(() => {
   $("#sendButton").click(() => {
     var fullname = document.querySelector("#fullname").textContent;
@@ -35,22 +37,36 @@ $(() => {
       );
     }
     scrollContainer();
-  });
-  // When the user presses a key in the input box, the typing event is emitted.
-  sentMessage.addEventListener('keypress', () => {
-    socket.emit('typing', { username: 'fullname' });
-  });
 
-  // Listen for typing event from other users
-  // Update the typing indicator
-  socket.on('typing', (data) => {
-    typingDiv.innerText = `${data.username} is typing...`;
-  });
-   // Clear the typing indicator
-  socket.on('stop typing', () => {
-    typingDiv.innerText = ''; 
+    // Implementing for typing event from other users
+    $(document).ready(function(){
+      $('#sendMessage').keypress((e)=>{
+        if(e.which!=13){
+          typing=true
+          socket.emit('typing', data={user:fullname, typing:true})
+          timeout=setTimeout(typingTimeout, 3000)
+        }else{
+          clearTimeout(timeout)
+          typingTimeout()
+          //sendMessage() function will be called once the user hits enter
+          sendMessage()
+        }
+      })
+      //code for triggering the user is typing
+          socket.on('display', (data)=>{
+        if(data.typing==true)
+          $('#typing').text(`${data.user} is typing...`)
+        else
+          $('#typing').text("")
+      })
+    })
   });
 });
+
+
+
+
+
 
 // displaying messages on the UI
 function getMessages() {
