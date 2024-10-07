@@ -184,6 +184,8 @@ socketIO.on('connection', (socket)=>{
       typingTimers[socket.id] = setTimeout(() => {
         // Emit event to stop displaying 'is typing' after 10 seconds
         data.typing = false;
+        //broadcast is a property of the socket object in Socket.IO. It allows you..
+        //to send a message to all connected clients except the one that triggered the event.
         socket.broadcast.emit('display', data);
       }, 10000); // 10 seconds
 
@@ -208,16 +210,6 @@ socketIO.on('connection', (socket)=>{
   });
 });
 
-// loading the searchinfo page
-app.get("/searchinfo", (request, response) => {
-  response.render("searchinfo");
-});
-
-// loading the sharestatus page
-app.get("/sharestatus", (request, response) => {
-  response.render("sharestatus");
-});
-
 
 // loading the dashboard
 app.get("/home", (request, response) => {
@@ -231,6 +223,34 @@ app.get("/home", (request, response) => {
   } else {
     response.redirect("/");
   }
+});
+
+// loading the searchinfo page
+app.get("/searchinfo", (request, response) => {
+  session = request.session;
+  // uname = request.session.fullname;
+  if (session.uid && session.fname) {
+    response.render("searchinfo", {
+      data: {
+        userid: session.uid,
+        fullname: session.fname,
+      },
+    });
+  } else response.redirect("/");
+});
+
+// loading the sharestatus page
+app.get("/sharestatus", (request, response) => {
+  session = request.session;
+  // uname = request.session.fullname;
+  if (session.uid && session.fname) {
+    response.render("sharestatus", {
+      data: {
+        userid: session.uid,
+        fullname: session.fname,
+      },
+    });
+  } else response.redirect("/");
 });
 
 //loading the chatroom

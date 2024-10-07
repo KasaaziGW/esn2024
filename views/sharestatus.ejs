@@ -12,14 +12,15 @@
             <div class="status-update-container">
                 <form id="status-form" action="" method="">
                     <label for="status-select">Select Your Status:</label>
-                    <select id="status-select" name="status">
+                    <select id="status-select" name="status"> 
+                        <option value="undefined" selected>Undefined</option>
                         <option value="OK">OK</option>
                         <option value="Help">Help</option>
                         <option value="Emergency">Emergency</option>
                     </select>
                     <button type="submit">Update Status</button>
                 </form>
-                <div id="status-message"></div>
+                <div id="status-message">Your status has been updated!</div> <!-- Example message -->
             </div>
         </div>
         

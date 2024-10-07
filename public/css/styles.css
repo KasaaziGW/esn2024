@@ -98,7 +98,7 @@ body {
 }
 .navHover > li:hover{
     color: #fff;
-    background-color: #0d6efd;
+    background-color: #b6afd3;
     border-radius: 25px;
 }
 #icon {
@@ -266,45 +266,66 @@ input[type=password]:placeholder {
     font-weight: 300;
 }
 
-
 /* General container styles */
 .search-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 50px;
+    margin: 50px 0;
     padding: 20px;
     border: 1px solid #ddd;
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 400px;
+    width: 60%;
     margin-left: auto;
     margin-right: auto;
 }
 
-/* Search input and button styling */
-#search-criteria {
-    padding: 10px;
+/* Search form styling */
+#search-form {
     width: 100%;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-    margin-bottom: 15px;
 }
 
+/* Label styling */
+#search-form label {
+    font-size: 16px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Container for input and button to align them horizontally */
+.input-button-container {
+    display: flex;
+    align-items: center; /* Vertically center align */
+}
+
+/* Search input styling */
+#search-criteria {
+    padding: 10px;
+    width: 70%; /* Adjust width to make space for button */
+    border-radius: 4px 0 0 4px; /* Rounded left side only */
+    border: 1px solid #ccc;
+    font-size: 16px;
+    margin-right: -1px; /* Ensure no gap between input and button */
+}
+
+/* Search button styling */
 .search-button {
     padding: 10px 20px;
-    background-color: #4CAF50;
-    border: none;
-    color: white;
+    background-color: #d4d0e5;
+    border: 1px solid #d4d0e5;
+    color: #000;
     font-size: 16px;
-    border-radius: 4px;
+    border-radius: 0 4px 4px 0;
     cursor: pointer;
+    width: 30%;
+    font-weight: bold;
 }
 
 .search-button:hover {
-    background-color: #45a049;
+    background-color: #7a6dae;
+    color: #fff;
 }
 
 /* Results area styling */
@@ -329,62 +350,92 @@ input[type=password]:placeholder {
 
 
 
-.status-form {
-    background-color: #e0e0e0;
-    padding: 20px 30px;
-    border-radius: 12px;
-    box-shadow: 10px 10px 20px #d1d1d1, -10px -10px 20px #ffffff;
+/* General container styling */
+.status-update-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 300px;
-    width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 50px;
+  padding: 20px;
+  width: 70%;
+  background-color: #f4f4f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd;
 }
 
-.status-label {
-    font-size: 1.2rem;
-    color: #555;
+/* Form label styling */
+.status-update-container label {
+    font-size: 18px;
+    font-weight: 600;
     margin-bottom: 10px;
+    color: #333;
 }
 
-.status-select {
+/* Select dropdown styling */
+.status-update-container select {
+    padding: 10px 15px;
     width: 100%;
-    padding: 10px;
-    border: none;
     border-radius: 8px;
-    box-shadow: inset 5px 5px 10px #b8b8b8, inset -5px -5px 10px #ffffff;
-    margin-bottom: 20px;
-    font-size: 1rem;
-    background-color: #e0e0e0;
+    border: 1px solid #ccc;
+    font-size: 16px;
     color: #333;
-    cursor: pointer;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.status-update-container select:hover, 
+.status-update-container select:focus {
+    border-color: #B6AFD3;
+     box-shadow: 0 2px 5px rgb(182, 175, 211);
     outline: none;
 }
 
-.status-button {
+/* Submit button styling */
+.status-update-container button {
     padding: 10px 20px;
-    font-size: 1rem;
-    color: #fff;
-    background-color: #007BFF;
+    width: 100%;
+    background-color: #b6afd3;
     border: none;
     border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
-    box-shadow: 5px 5px 10px #b8b8b8, -5px -5px 10px #ffffff;
-    transition: background-color 0.3s ease;
-    width: 100%;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.1);
 }
 
-.status-button:hover {
-    background-color: #0056b3;
-}
+.status-update-container button:hover {
+    background-color: #7a6dae;
+    box-shadow: 0 4px 8px #988ec1;
 
-.status-button:active {
-    background-color: #004494;
-    box-shadow: inset 5px 5px 10px #b8b8b8, inset -5px -5px 10px #ffffff;
-}
-
-.status-message {
+/* Status message area styling */
+#status-message {
     margin-top: 20px;
-    font-size: 1rem;
+    font-size: 16px;
+    font-weight: 600;
     color: #333;
+    padding: 10px;
+    background-color: #e0f7fa;
+    border: 1px solid #4CAF50;
+    border-radius: 8px;
+    display: none; /* Hide until a status update is shown */
+}
+
+/* Media query for responsive design */
+@media (max-width: 600px) {
+    .status-update-container {
+        width: 90%;
+    }
+    
+    .status-update-container button {
+        font-size: 14px;
+    }
+    
+    .status-update-container select {
+        font-size: 14px;
+    }
 }

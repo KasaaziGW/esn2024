@@ -55,7 +55,8 @@
   }
   .btn-toggle-nav a:hover,
   .btn-toggle-nav a:focus {
-    background-color: var(--bs-tertiary-bg);
+    background-color:#b6afd3;
+    /*background-color: var(--bs-tertiary-bg);*/
   }
   
   .scrollarea {
