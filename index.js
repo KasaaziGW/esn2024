@@ -160,18 +160,53 @@ app.post("/processLogin", (request, response) => {
     });
 });
 
+
+// Store typing timers for each socket
+let typingTimers = {};
+
 // Event for triggering user is typing
 socketIO.on('connection', (socket)=>{
   /*from server side we will emit 'display' event once the user starts typing
   so that on the client side we can capture this event and display 
   '<data.user> is typing...' */
-  socket.on('typing', (data)=>{
-    if(data.typing==true)
-       socketIO.emit('display', data)
-    else
-       socketIO.emit('display', data)
+  
+  socket.on('typing', (data) => {
+    // If the user is typing
+    if (data.typing === true) {
+      socket.broadcast.emit('display', data);
+
+      // If a timer exists for this user, clear it
+      if (typingTimers[socket.id]) {
+        clearTimeout(typingTimers[socket.id]);
+      }
+
+      // Start a new timer for 10 seconds
+      typingTimers[socket.id] = setTimeout(() => {
+        // Emit event to stop displaying 'is typing' after 10 seconds
+        data.typing = false;
+        socket.broadcast.emit('display', data);
+      }, 10000); // 10 seconds
+
+    } else {
+      // User stopped typing manually
+      socket.broadcast.emit('display', data);
+
+      // Clear the timer if the user manually stopped typing
+      if (typingTimers[socket.id]) {
+        clearTimeout(typingTimers[socket.id]);
+        delete typingTimers[socket.id];
+      }
+    }
   });
-}); 
+
+  // Clear the timer when the socket disconnects
+  socket.on('disconnect', () => {
+    if (typingTimers[socket.id]) {
+      clearTimeout(typingTimers[socket.id]);
+      delete typingTimers[socket.id];
+    }
+  });
+});
 
 // loading the searchinfo page
 app.get("/searchinfo", (request, response) => {
