@@ -11,7 +11,7 @@
         <div class="d-flex flex-column flex-shrink-0 p-3" style="width: 100%;">
             <div class="status-update-container">
         
-                <form id="status-form" action="/status" method="POST" onsubmit="return false;">
+                <form id="status-form" action="/status" method="POST" >
                     <label for="status-select"><%= data.fullname %>&nbsp;Select Your Status:</label>
                     <select id="status-select" name="status"> 
                         <option value="Undefined" selected>Undefined</option>

@@ -158,6 +158,8 @@ app.post("/processLogin", (request, response) => {
       request.flash("error", `Error while logging in! \n${err}`);
       response.redirect("/");
     });
+
+    
 });
 
 // Store typing timers for each socket
@@ -266,6 +268,35 @@ app.post('/search', async (request, response) => {
 });
 
 
+// Route to handle status update
+app.post('/status', async (request, response) => {
+  try {
+      // Destructure userId and status from the request body
+      const { userId, status } = request.body;
+
+      // Log to confirm if userId and status are passed correctly
+      console.log("Received userId:", userId);
+      console.log("Received status:", status);
+
+      // Validate the status
+      const validStatuses = ['OK', 'Help', 'Emergency', 'Undefined'];
+      if (!validStatuses.includes(status)) {
+          return response.status(400).json({ success: false, message: 'Invalid status' });
+      }
+
+      // Update citizen's status in the database
+      const updatedCitizen = await Citizen.findByIdAndUpdate(userId, { status: status }, { new: true });
+
+      if (updatedCitizen) {
+          response.json({ success: true, message: 'Status updated successfully', citizen: updatedCitizen });
+      } else {
+          response.status(404).json({ success: false, message: 'Citizen not found' });
+      }
+  } catch (error) {
+      console.error('Error updating status:', error);
+      response.status(500).json({ success: false, message: 'Server error' });
+  }
+});
 
 
 

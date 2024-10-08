@@ -160,7 +160,38 @@ $(() => {
               resultsList.innerHTML = '<li>Error fetching results</li>';
           }
       });
-    })
+    });
+
+
+    document.getElementById('status-form').addEventListener('submit', function() {
+      const status = document.getElementById('status-select').value;
+      const userId = document.getElementById('user-id').value;  // Get userId from the hidden input field
+
+      // Check if userId is correctly captured
+      console.log('User ID:', userId);
+
+      fetch('/status', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ userId: userId, status: status })  // Send userId and status to the server
+      })
+      .then(response => response.json())
+      .then(data => {
+          const statusMessage = document.getElementById('status-message');
+          if (data.success) {
+              statusMessage.textContent = "Status updated successfully!";
+          } else {
+              statusMessage.textContent = `Error: ${data.message}`;
+          }
+      })
+      .catch(error => {
+          console.error('Error updating status:', error);
+          document.getElementById('status-message').textContent = "Error updating status.";
+      });
+    });
+
   });
 });
 
