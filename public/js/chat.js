@@ -55,14 +55,114 @@ $(() => {
       //code for triggering the user is typing
           socket.on('display', (data)=>{
         if(data.typing==true)
-          $('#typing').text(`${data.user} is typing...`)
+          //Putting the space between the user name and the word is typing using this\u00A0
+        //  ${data.user} was introduced before \u00A0 to display users full names but it was remove because the used is already diplaye on the dashboard
+          $('#typing').text(`\u00A0 is typing...`)
         else
           $('#typing').text("")
       })
     })
+
+    // JavaScript code that handles the search input, fetches autocomplete suggestions, and displays search results 
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchForm = document.getElementById('search-form');
+      const searchInput = document.getElementById('search-criteria');
+      const suggestionBox = document.getElementById('suggestion-box');
+      const resultsList = document.getElementById('results-list');
+
+      let typingTimer; // Timer identifier
+      const typingDelay = 300; // Delay in milliseconds
+
+      // Listen for input in the search criteria field
+      searchInput.addEventListener('input', () => {
+          // Clear previous suggestions
+          suggestionBox.innerHTML = '';
+
+          const searchCriteria = searchInput.value.trim();
+
+          // Clear the timer if the user is typing
+          clearTimeout(typingTimer);
+
+          // Set a new timer
+          typingTimer = setTimeout(async () => {
+              if (searchCriteria.length < 3) {
+                  // Don't perform a search if the input is less than 3 characters
+                  return;
+              }
+
+              try {
+                  const response = await fetch('/search', {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({ searchCriteria })
+                  });
+
+                  const data = await response.json();
+
+                  if (data.success && data.results) {
+                      // Display suggestions
+                      data.results.forEach(result => {
+                          const suggestionItem = document.createElement('div');
+                          suggestionItem.classList.add('suggestion-item');
+                          suggestionItem.textContent = result.fullname; // Display the fullname
+                          suggestionItem.onclick = () => {
+                              // Fill the input with the selected suggestion
+                              searchInput.value = result.fullname; 
+                              suggestionBox.innerHTML = ''; // Clear suggestions
+                          };
+                          suggestionBox.appendChild(suggestionItem);
+                      });
+                  } else {
+                      suggestionBox.innerHTML = '<div class="suggestion-item">No suggestions found</div>';
+                  }
+              } catch (error) {
+                  console.error('Error fetching suggestions:', error);
+                  suggestionBox.innerHTML = '<div class="suggestion-item">Error fetching suggestions</div>';
+              }
+          }, typingDelay);
+      });
+
+      // Handle the form submission
+      searchForm.addEventListener('submit', async (event) => {
+          event.preventDefault(); // Prevent default form submission
+
+          const searchCriteria = searchInput.value.trim();
+
+          // Perform a search request
+          try {
+              const response = await fetch('/search', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({ searchCriteria })
+              });
+
+              const data = await response.json();
+
+              // Clear previous results
+              resultsList.innerHTML = '';
+
+              if (data.success && data.results) {
+                  // Display search results
+                  data.results.forEach(result => {
+                      const listItem = document.createElement('li');
+                      listItem.textContent = `${result.fullname} - ${result.email}`; // Display results (customize as needed)
+                      resultsList.appendChild(listItem);
+                  });
+              } else {
+                  resultsList.innerHTML = '<li>No results found</li>';
+              }
+          } catch (error) {
+              console.error('Error fetching results:', error);
+              resultsList.innerHTML = '<li>Error fetching results</li>';
+          }
+      });
+    })
   });
 });
-
 
 
 

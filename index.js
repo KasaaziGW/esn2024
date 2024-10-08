@@ -160,7 +160,6 @@ app.post("/processLogin", (request, response) => {
     });
 });
 
-
 // Store typing timers for each socket
 let typingTimers = {};
 
@@ -211,6 +210,65 @@ socketIO.on('connection', (socket)=>{
 });
 
 
+
+// Backend Code (Single Route for Search and Autocomplete):
+// Search Route and autcomplete route
+// handle the autocomplete logic directly within the existing search route. This way, the same route can 
+// provide both search results and suggestions based on the input length or some other criteria.
+app.post('/search', async (request, response) => {
+  const searchCriteria = request.body.searchCriteria;
+
+  // Check if searchCriteria is provided
+  if (!searchCriteria) {
+      return res.json({ success: false, message: 'No search criteria provided' });
+  }
+
+  // Determine if it's an autocomplete request (you can define your own condition)
+  const isAutocomplete = searchCriteria.length < 3; // Example: if input is less than 3 characters, treat as autocomplete
+
+  let searchResults;
+
+  // If it's an autocomplete request, limit results and only return fullname
+  if (isAutocomplete) {
+      searchResults = await Citizen.find({
+          $or: [
+              { fullname: new RegExp(searchCriteria, 'i') },
+              { username: new RegExp(searchCriteria, 'i') },
+              { email: new RegExp(searchCriteria, 'i') }
+          ]
+      }, 'fullname')  // Only retrieve the 'fullname' field for suggestions
+      .limit(5)        // Limit to 5 suggestions
+      .exec();
+      
+      // Respond with suggestions
+      if (searchResults.length > 0) {
+          return response.json({ success: true, results: searchResults });
+      } else {
+          return response.json({ success: false, message: 'No suggestions found' });
+      }
+  }
+
+  // For a full search request
+  searchResults = await Citizen.find({
+      $or: [
+          { fullname: new RegExp(searchCriteria, 'i') },
+          { username: new RegExp(searchCriteria, 'i') },
+          { email: new RegExp(searchCriteria, 'i') }
+      ]
+  }).exec();
+
+  // Respond with full search results
+  if (searchResults.length > 0) {
+      response.json({ success: true, results: searchResults });
+  } else {
+      response.json({ success: false, message: 'No matching records found' });
+  }
+});
+
+
+
+
+
 // loading the dashboard
 app.get("/home", (request, response) => {
   if (session.uid && session.fname) {
@@ -252,6 +310,8 @@ app.get("/sharestatus", (request, response) => {
     });
   } else response.redirect("/");
 });
+
+
 
 //loading the chatroom
 app.get("/chatroom", (request, response) => {
