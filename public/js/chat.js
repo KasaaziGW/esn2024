@@ -162,32 +162,46 @@ $(() => {
       });
     });
 
+    // Add an event listener to the form's submit event
+    document.getElementById('status-form').addEventListener('submit', function(event) {
+      event.preventDefault();  // Prevent the default form submission behavior
 
-    document.getElementById('status-form').addEventListener('submit', function() {
+      // Get the selected status value from the dropdown
       const status = document.getElementById('status-select').value;
-      const userId = document.getElementById('user-id').value;  // Get userId from the hidden input field
+      
+      // Get the userId from a hidden input field in the form
+      const userId = document.getElementById('user-id').value;
 
-      // Check if userId is correctly captured
+      // Log the userId to the console for debugging purposes
       console.log('User ID:', userId);
 
+      // Send a POST request to the server to update the user's status
       fetch('/status', {
-          method: 'POST',
+          method: 'POST',  // Specify that this is a POST request
           headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json'  // Indicate that the request body will be in JSON format
           },
-          body: JSON.stringify({ userId: userId, status: status })  // Send userId and status to the server
+          // Convert the userId and status into a JSON string to send as the request body
+          body: JSON.stringify({ userId: userId, status: status })  
       })
-      .then(response => response.json())
+      .then(response => response.json())  // Parse the JSON response from the server
       .then(data => {
+          // Get the DOM element to display the status update message
           const statusMessage = document.getElementById('status-message');
+          
+          // If the server responds with success, update the message accordingly
           if (data.success) {
               statusMessage.textContent = "Status updated successfully!";
           } else {
+              // If there is an error, display the error message from the server response
               statusMessage.textContent = `Error: ${data.message}`;
           }
       })
       .catch(error => {
+          // Log any error that occurs during the fetch operation
           console.error('Error updating status:', error);
+          
+          // Update the status message to inform the user of an error
           document.getElementById('status-message').textContent = "Error updating status.";
       });
     });

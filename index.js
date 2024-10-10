@@ -32,6 +32,8 @@ app.use(function (request, response, next) {
 
 // set up the body-parser utility
 app.use(bodyParser.json());
+// Middleware to parse URL-encoded data from incoming requests
+// extended: true allows for nested objects to be parsed, using the qs library instead of the default querystring library
 app.use(bodyParser.urlencoded({ extended: true }));
 // setting the templating engine
 app.set("view engine", "ejs");
@@ -222,7 +224,7 @@ app.post('/search', async (request, response) => {
 
   // Check if searchCriteria is provided
   if (!searchCriteria) {
-      return res.json({ success: false, message: 'No search criteria provided' });
+      return response.json({ success: false, message: 'No search criteria provided' });
   }
 
   // Determine if it's an autocomplete request (you can define your own condition)
@@ -271,8 +273,9 @@ app.post('/search', async (request, response) => {
 // Route to handle status update
 app.post('/status', async (request, response) => {
   try {
-      // Destructure userId and status from the request body
-      const { userId, status } = request.body;
+      // Access userId from the session instead of the request body
+      const userId = request.session.uid;
+      const { status } = request.body;  // Only get the status from the request body
 
       // Log to confirm if userId and status are passed correctly
       console.log("Received userId:", userId);
