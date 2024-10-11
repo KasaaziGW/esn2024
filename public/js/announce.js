@@ -39,7 +39,9 @@ document.getElementById('announcementForm').addEventListener('submit', function(
 
 function displayAnnouncements() {
   const list = document.getElementById('announcementsList');
-  list.innerHTML = ''; // Clear existing list
+  list.innerHTML = ''; 
+  
+  // Clear existing list
 
   announcements.forEach(a => {
     const li = document.createElement('li');
