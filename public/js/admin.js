@@ -7,7 +7,7 @@ if (!isAdminLoggedIn) {
   window.location.href = '/login.html';
 }
 
-// Fetch user data (for demonstration purposes, using static data)
+// Fetch user data 
 const user = {
   username: 'ESNAdmin',
   password: 'admin',
@@ -42,8 +42,8 @@ document.getElementById('userProfileForm').addEventListener('submit', function (
     alert("password must be at least 6 characters long");
     return;
   }
-  // Send the updated data to the server or simulating server update (placeholder, use Fetch for real implementation)
-  
+  // Send the updated data to the server or simulating server update 
+
   updateUserProfile(username, accountStatus, priviledgeRole, password)
     .then(response => {
       if (response.success) {
@@ -76,7 +76,7 @@ function updateUserProfile(userData) {
         throw error;
       });
   }
-// Check if a user has 'Coordinator' privilege or role
+// Check if a user has 'Coordinator' privilege
 const userPrivilege = 'coordinator'; // Placeholder
 
 if (userPrivilege !== 'coordinator') {
