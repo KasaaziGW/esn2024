@@ -62,76 +62,35 @@ $(() => {
           $('#typing').text("")
       })
     })
+// JavaScript code that handles the search input, fetches autocomplete suggestions, and displays search results
+document.addEventListener('DOMContentLoaded', () => {
+  const searchForm = document.getElementById('search-form');
+  const searchInput = document.getElementById('search-criteria');
+  const suggestionBox = document.getElementById('suggestion-box');
+  const resultsList = document.getElementById('results-list');      
 
-    // JavaScript code that handles the search input, fetches autocomplete suggestions, and displays search results 
-    document.addEventListener('DOMContentLoaded', () => {
-      const searchForm = document.getElementById('search-form');
-      const searchInput = document.getElementById('search-criteria');
-      const suggestionBox = document.getElementById('suggestion-box');
-      const resultsList = document.getElementById('results-list');
+  let typingTimer; // Timer identifier
+  const typingDelay = 300; // Delay in milliseconds
 
-      let typingTimer; // Timer identifier
-      const typingDelay = 300; // Delay in milliseconds
+  // Listen for input in the search criteria field
+  searchInput.addEventListener('input', () => {
+      // Clear previous suggestions
+      suggestionBox.innerHTML = '';
 
-      // Listen for input in the search criteria field
-      searchInput.addEventListener('input', () => {
-          // Clear previous suggestions
-          suggestionBox.innerHTML = '';
+      const searchCriteria = searchInput.value.trim();
 
-          const searchCriteria = searchInput.value.trim();
+      // Clear the timer if the user is typing
+      clearTimeout(typingTimer);
 
-          // Clear the timer if the user is typing
-          clearTimeout(typingTimer);
+      // Set a new timer for debounce effect to avoid too many requests
+      typingTimer = setTimeout(async () => {
+          if (searchCriteria.length < 3) {
+              // Don't perform a search if the input is less than 3 characters
+              return;
+          }
 
-          // Set a new timer
-          typingTimer = setTimeout(async () => {
-              if (searchCriteria.length < 3) {
-                  // Don't perform a search if the input is less than 3 characters
-                  return;
-              }
-
-              try {
-                  const response = await fetch('/search', {
-                      method: 'POST',
-                      headers: {
-                          'Content-Type': 'application/json'
-                      },
-                      body: JSON.stringify({ searchCriteria })
-                  });
-
-                  const data = await response.json();
-
-                  if (data.success && data.results) {
-                      // Display suggestions
-                      data.results.forEach(result => {
-                          const suggestionItem = document.createElement('div');
-                          suggestionItem.classList.add('suggestion-item');
-                          suggestionItem.textContent = result.fullname; // Display the fullname
-                          suggestionItem.onclick = () => {
-                              // Fill the input with the selected suggestion
-                              searchInput.value = result.fullname; 
-                              suggestionBox.innerHTML = ''; // Clear suggestions
-                          };
-                          suggestionBox.appendChild(suggestionItem);
-                      });
-                  } else {
-                      suggestionBox.innerHTML = '<div class="suggestion-item">No suggestions found</div>';
-                  }
-              } catch (error) {
-                  console.error('Error fetching suggestions:', error);
-                  suggestionBox.innerHTML = '<div class="suggestion-item">Error fetching suggestions</div>';
-              }
-          }, typingDelay);
-      });
-
-      // Handle the form submission
-      searchForm.addEventListener('submit', async (event) => {
-          event.preventDefault(); // Prevent default form submission
-
-          const searchCriteria = searchInput.value.trim();
-
-          // Perform a search request
           try {
+              // Send POST request to the server for autocomplete suggestions
               const response = await fetch('/search', {
                   method: 'POST',
                   headers: {
@@ -142,27 +101,99 @@ $(() => {
 
               const data = await response.json();
 
-              // Clear previous results
-              resultsList.innerHTML = '';
-
+              // Check if autocomplete results are returned
               if (data.success && data.results) {
-                  // Display search results
+                  // Display suggestions in the suggestion box
                   data.results.forEach(result => {
-                      const listItem = document.createElement('li');
-                      listItem.textContent = `${result.fullname} - ${result.email}`; // Display results (customize as needed)
-                      resultsList.appendChild(listItem);
+                      const suggestionItem = document.createElement('div');
+                      suggestionItem.classList.add('suggestion-item');
+                      suggestionItem.textContent = result.fullname; // Display only the fullname
+                      
+                      // Handle suggestion click - set search input and clear suggestions
+                      suggestionItem.onclick = () => {
+                          searchInput.value = result.fullname;
+                          suggestionBox.innerHTML = ''; // Clear suggestions
+                      };
+                      suggestionBox.appendChild(suggestionItem);
                   });
               } else {
-                  resultsList.innerHTML = '<li>No results found</li>';
+                  suggestionBox.innerHTML = '<div class="suggestion-item">No suggestions found</div>';
               }
           } catch (error) {
-              console.error('Error fetching results:', error);
-              resultsList.innerHTML = '<li>Error fetching results</li>';
+              console.error('Error fetching suggestions:', error);
+              suggestionBox.innerHTML = '<div class="suggestion-item">Error fetching suggestions</div>';
           }
-      });
-    });
+      }, typingDelay);
+  });
 
-    // Add an event listener to the form's submit event
+  // Handle the form submission for a full search
+  searchForm.addEventListener('submit', async (event) => {
+      event.preventDefault(); // Prevent default form submission
+
+      const searchCriteria = searchInput.value.trim();
+
+      // Perform a full search request
+      try {
+          // Send POST request to the server for full search results
+          const response = await fetch('/search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ searchCriteria })
+          });
+
+          const data = await response.json();
+
+          // Clear previous results
+          resultsList.innerHTML = '';
+
+          if (data.success && data.results) {
+              // Iterate over the search results
+              data.results.forEach(result => {
+                  const listItem = document.createElement('li');
+                  
+                  // Display citizen's full name and username/email
+                  listItem.innerHTML = `<strong>${result.citizen.fullname}</strong> - ${result.citizen.username}`;
+                  
+                  // Create a nested list to show the last 10 messages for each citizen
+                  const messageList = document.createElement('ul');
+                  messageList.classList.add('message-list');  // Add a class for styling purposes
+
+                  if (result.messages.length > 0) {
+                      // Iterate over the messages and display each
+                      result.messages.forEach(message => {
+                          const messageItem = document.createElement('li');
+                          messageItem.textContent = `${message.sentTime}: ${message.message}`;
+                          messageList.appendChild(messageItem);
+                      });
+                  } else {
+                      // If no messages are found, show a message indicating that
+                      const noMessagesItem = document.createElement('li');
+                      noMessagesItem.textContent = 'No messages found.';
+                      messageList.appendChild(noMessagesItem);
+                  }
+
+                  // Append the message list to the main list item
+                  listItem.appendChild(messageList);
+
+                  // Append the main list item (citizen + messages) to the results list
+                  resultsList.appendChild(listItem);
+              });
+          } else {
+              // If no results were found, display a "No results found" message
+              resultsList.innerHTML = '<li>No results found</li>';
+          }
+      } catch (error) {
+          console.error('Error fetching results:', error);
+          resultsList.innerHTML = '<li>Error fetching results</li>';
+      }
+  });
+});
+
+
+
+    // Add an event listener to the form's submit event when a user selects a status
     document.getElementById('status-form').addEventListener('submit', function(event) {
       event.preventDefault();  // Prevent the default form submission behavior
 

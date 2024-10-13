@@ -222,29 +222,30 @@ socketIO.on('connection', (socket)=>{
 app.post('/search', async (request, response) => {
   const searchCriteria = request.body.searchCriteria;
 
-  // Check if searchCriteria is provided
+  // Check if searchCriteria is provided in the request body
   if (!searchCriteria) {
       return response.json({ success: false, message: 'No search criteria provided' });
   }
 
-  // Determine if it's an autocomplete request (you can define your own condition)
-  const isAutocomplete = searchCriteria.length < 3; // Example: if input is less than 3 characters, treat as autocomplete
+  // Determine if it's an autocomplete request (less than 3 characters triggers autocomplete)
+  const isAutocomplete = searchCriteria.length < 3;
 
   let searchResults;
 
-  // If it's an autocomplete request, limit results and only return fullname
+  // Handle autocomplete request
   if (isAutocomplete) {
+      // Search citizens by fullname, username, or email (case-insensitive)
       searchResults = await Citizen.find({
           $or: [
               { fullname: new RegExp(searchCriteria, 'i') },
               { username: new RegExp(searchCriteria, 'i') },
               { email: new RegExp(searchCriteria, 'i') }
           ]
-      }, 'fullname')  // Only retrieve the 'fullname' field for suggestions
-      .limit(5)        // Limit to 5 suggestions
+      }, 'fullname')  // Only retrieve 'fullname' field for autocomplete suggestions
+      .limit(5)        // Limit results to 5 suggestions
       .exec();
       
-      // Respond with suggestions
+      // Respond with suggestions if found
       if (searchResults.length > 0) {
           return response.json({ success: true, results: searchResults });
       } else {
@@ -252,22 +253,37 @@ app.post('/search', async (request, response) => {
       }
   }
 
-  // For a full search request
+  // For a full search (input 3 characters or more)
   searchResults = await Citizen.find({
       $or: [
-          { fullname: new RegExp(searchCriteria, 'i') },
-          { username: new RegExp(searchCriteria, 'i') },
-          { email: new RegExp(searchCriteria, 'i') }
+          { fullname: new RegExp(searchCriteria, 'i') },  // Search by fullname (case-insensitive)
+          { username: new RegExp(searchCriteria, 'i') },  // Search by username
+          { email: new RegExp(searchCriteria, 'i') }      // Search by email
       ]
   }).exec();
 
-  // Respond with full search results
+  // If citizen records are found
   if (searchResults.length > 0) {
-      response.json({ success: true, results: searchResults });
+      // For each found citizen, also retrieve the last 10 messages they sent
+      const citizenWithMessages = await Promise.all(searchResults.map(async citizen => {
+          const messages = await Message.find({ sender: citizen.username })
+                                        .sort({ sentTime: -1 })  // Sort messages by latest
+                                        .limit(10)               // Limit to the last 10 messages
+                                        .exec();
+          return {
+              citizen,  // The citizen's details
+              messages  // The last 10 messages from that citizen
+          };
+      }));
+
+      // Send both the citizen data and their messages
+      response.json({ success: true, results: citizenWithMessages });
   } else {
+      // No matching records found
       response.json({ success: false, message: 'No matching records found' });
   }
 });
+
 
 
 // Route to handle status update
