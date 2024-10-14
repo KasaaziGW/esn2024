@@ -39,8 +39,7 @@ module.exports = function(passport){
 						console.log('Invalid Password');
 						return done(null, false); // redirect back to login page
 					}
-					// User and password both match, return user from done method
-					// which will be treated like success
+					
 					return done(null, user);
 				}
 			);
@@ -66,7 +65,7 @@ module.exports = function(passport){
 					console.log('Error in SignUp: '+err);
 					return done(err);
 				}
-				// already exists
+				
 				if (user) {
 					console.log('User already exists with username: '+username);
 					return done(null, false);
