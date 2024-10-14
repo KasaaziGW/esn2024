@@ -234,7 +234,7 @@ if (!isAdminLoggedIn) {
 
   // Redirect to login page or home page
   
-  window.location.href = '/login.html';
+  window.location.href = '/login';
 }
 
 // Fetch user data 
@@ -261,7 +261,8 @@ document.getElementById('userProfileForm').addEventListener('submit', function (
     password: user.password,
     email: document.getElementById('email').value,
     role: document.getElementById('role').value
-  };
+  }
+}
   //validate fields by rules
 
   if(!username.match(/^[a-zA-Z0-9]+$/)) {
@@ -283,7 +284,7 @@ document.getElementById('userProfileForm').addEventListener('submit', function (
     })
     .catch(error => {
       console.error('Error updating profile:', error);
-    });
+    })
 });
 
 // Server update function for sending updated user profile data
