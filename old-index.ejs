@@ -296,6 +296,8 @@ app.post('/search', async (request, response) => {
 
 
 
+
+
 // Route to handle status update
 app.post('/status', async (request, response) => {
   try {
@@ -319,7 +321,6 @@ app.post('/status', async (request, response) => {
 
       // Update citizen's status in the database
       const updatedCitizen = await Citizen.findByIdAndUpdate(userId, { status: status }, { new: true });
-      //find another way of method of updating using the field not use find by ID NUT 
 
       if (updatedCitizen) {
           response.json({ success: true, message: 'Status updated successfully', citizen: updatedCitizen });
