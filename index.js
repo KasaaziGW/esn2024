@@ -265,11 +265,21 @@ app.post('/search', async (request, response) => {
   // If citizen records are found
   if (searchResults.length > 0) {
       // For each found citizen, also retrieve the last 10 messages they sent
+      // Promise.all(...) Waits for all the asynchronous operations (finding messages for each citizen) to complete before proceeding. 
+      // It ensures the code waits until the last message for the last citizen is retrieved.
+      // searchResults.map(...) Iterates over each citizen in the 
+      // searchResults array and runs the asynchronous function for each citizen to fetch their messages.
       const citizenWithMessages = await Promise.all(searchResults.map(async citizen => {
+        // Message.find(...): This performs a query on the Message collection, looking for messages where 
+        // the sender field matches the citizen.username.
           const messages = await Message.find({ sender: citizen.username })
+                                      //sort({ sentTime: -1 }): Sorts the messages in descending order of 
+                                      // sentTime, meaning the most recent messages appear first.
                                         .sort({ sentTime: -1 })  // Sort messages by latest
                                         .limit(10)               // Limit to the last 10 messages
                                         .exec();
+                                         // Log each message with its sentTime
+
           return {
               citizen,  // The citizen's details
               messages  // The last 10 messages from that citizen
@@ -299,9 +309,13 @@ app.post('/status', async (request, response) => {
 
       // Validate the status
       const validStatuses = ['OK', 'Help', 'Emergency', 'Undefined'];
+      // Check if the provided status is not part of the validStatuses array
+      // This checks whether the status provided in the request is not part of the validStatuses array (using includes() to see if the value exists).
       if (!validStatuses.includes(status)) {
-          return response.status(400).json({ success: false, message: 'Invalid status' });
+        // If the status is invalid, return a 400 Bad Request response with an error message
+        return response.status(400).json({ success: false, message: 'Invalid status' });
       }
+
 
       // Update citizen's status in the database
       const updatedCitizen = await Citizen.findByIdAndUpdate(userId, { status: status }, { new: true });

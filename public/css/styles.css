@@ -439,3 +439,11 @@ input[type=password]:placeholder {
         font-size: 14px;
     }
 }
+.message-list {
+    margin-left: 20px;  /* Indent the messages list to make it visually nested */
+    font-size: 0.9em;   /* Adjust the font size for messages */
+}
+
+.message-list li {
+    padding: 5px 0;     /* Add some padding between messages */
+}
