@@ -275,42 +275,34 @@ document.getElementById('userProfileForm').addEventListener('submit', function (
   // Send the updated data to the server or simulating server update 
 
   updateUserProfile(username, accountStatus, priviledgeRole, password)
-    .then(response => {
-      if (response.success) {
-        document.getElementById('message').textContent="User profile updated successfully!";
-      } else {
-        ocument.getElementById('message').textContent="Error updating profile!";
-    })
-    .catch(error => {
-      console.error('Error updating profile:', error);
-    });
-});
+  .then(response => {
+    if (response.success) {
+      document.getElementById('message').textContent = "User profile updated successfully!";
+    } else {
+      document.getElementById('message').textContent = "Error updating profile!";
+    }
+  })
+  .catch(error => {
+    console.error("Error updating profile:", error);
+    document.getElementById('message').textContent = "An unexpected error occurred.";
+  });
+
 
 // Server update function for sending updated user profile data
 
-function updateUserProfile(username, status, priviledgeRole, password) {
-  return new Promise(resolve, reject) => {
+function updateUserProfile(username, accountStatus, priviledgeRole, password) {
+  return new Promise((resolve, reject) => {
+    // Simulate async operation, e.g., API call to update the profile
+    const isSuccess = true; // Replace with actual condition
 
-    // Simulating an asynchronous server request
-
-    setTimeout(() => {
-function updateUserProfile(userData) {
-    return fetch('/api/updateUserProfile', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(userData)
-    })
-      .then(response => response.json())
-      .catch(error => {
-        console.error('Error updating profile:', error);
-        throw error;
-      });
-  }       
+    if (isSuccess) {
+      resolve({ success: true });
+    } else {
+      reject(new Error("Profile update failed"));
     }
-  }
+  });
 }
+
 
 // Check if a user has 'Coordinator' privilege
 const userPrivilege = 'coordinator';
@@ -369,7 +361,6 @@ function displayAnnouncements() {
 }
 
 // Function to post an announcement
-
 function postAnnouncement(text) {
   return new Promise((resolve) => {
     const newAnnouncement = {
@@ -379,5 +370,6 @@ function postAnnouncement(text) {
     };
     announcements.push(newAnnouncement);
     resolve({ success: true });
-  });
-}
+  }); // Make sure this is closed
+} // Ensure the function is closed properly
+
