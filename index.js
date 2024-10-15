@@ -234,7 +234,7 @@ if (!isAdminLoggedIn) {
 
   // Redirect to login page or home page
   
-  window.location.href = '/login';
+  window.location.href = '/login.html';
 }
 
 // Fetch user data 
@@ -261,22 +261,20 @@ document.getElementById('userProfileForm').addEventListener('submit', function (
     password: user.password,
     email: document.getElementById('email').value,
     role: document.getElementById('role').value
-  }
-}
+  };
   //validate fields by rules
 
   if(!username.match(/^[a-zA-Z0-9]+$/)) {
     alert("invalid username. please follow the username rules.");
     return;
   }
-  {if(password && password.length<6) {
+  if(password && password.length<6) {
     alert("password must be at least 6 characters long");
     return;
   }
   // Send the updated data to the server or simulating server update 
 
   updateUserProfile(username, accountStatus, priviledgeRole, password)
-<<<<<<< HEAD
   .then(response => {
     if (response.success) {
       document.getElementById('message').textContent = "User profile updated successfully!";
@@ -289,18 +287,6 @@ document.getElementById('userProfileForm').addEventListener('submit', function (
     document.getElementById('message').textContent = "An unexpected error occurred.";
   });
 
-=======
-    .then(response => {
-      if (response.success) {
-        document.getElementById('message').textContent="User profile updated successfully!";
-      } else {
-        ocument.getElementById('message').textContent="Error updating profile!";
-    })
-    .catch(error => {
-      console.error('Error updating profile:', error);
-    })
-});
->>>>>>> 6e1db58f6bca5d1beeb2908daea2e0346b993565
 
 // Server update function for sending updated user profile data
 
@@ -382,8 +368,9 @@ function postAnnouncement(text) {
       author: 'Coordinator',
       timestamp: new Date().toLocaleString()
     };
-    announcements.push(newAnnouncement);
+    announcements.push(newAnnouncement); // No need to declare 'announcements' again
     resolve({ success: true });
-  }); // Make sure this is closed
-} // Ensure the function is closed properly
+  });
+}
 
+ 
