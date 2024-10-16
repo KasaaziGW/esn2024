@@ -255,14 +255,14 @@ document.getElementById('priviledge').value = user.role;
 document.getElementById('userProfileForm').addEventListener('submit', function (event) {
   event.preventDefault();
 
-  // Collect updated data
+  // Collecting updated data
   const updatedUser = {
     username: user.username,
     password: user.password,
     email: document.getElementById('email').value,
     role: document.getElementById('role').value
   };
-  //validate fields by rules
+  //validating fields by rules
 
   if(!username.match(/^[a-zA-Z0-9]+$/)) {
     alert("invalid username. please follow the username rules.");
@@ -291,7 +291,7 @@ document.getElementById('userProfileForm').addEventListener('submit', function (
 function updateUserProfile(username, accountStatus, priviledge, password) {
   return new Promise((resolve, reject) => {
     // Simulate async operation, API call to update the profile
-    const isSuccess = true; // Replace with actual condition
+    const isSuccess = true;
 
     if (isSuccess) {
       resolve({ success: true });
@@ -301,14 +301,15 @@ function updateUserProfile(username, accountStatus, priviledge, password) {
   });
 }
 
-// Check if a user has 'Coordinator' privilege
+// Checking if a user has 'Coordinator' privilege
+
 const userPrivilege = 'coordinator';
 
 // Placeholder
 
 if (userPrivilege !== 'coordinator') {
   alert("Access denied. Only Coordinators can post announcements.");
-  window.location.href = '/login.html';
+  window.location.href = '/login';
 
   // Redirect to login if not a Coordinator
 }
@@ -342,13 +343,13 @@ document.getElementById('announcementForm').addEventListener('submit', function(
       }
     });
 });
-// Function to display 
+// Function to display an announcement
 
 function displayAnnouncements() {
   const list = document.getElementById('announcementsList');
   list.innerHTML = ''; 
   
-  // Clear existing list
+  // Clearing an existing list
 
   announcements.forEach(a => {
     const li = document.createElement('li');
@@ -365,7 +366,7 @@ function postAnnouncement(text) {
       author: 'Coordinator',
       timestamp: new Date().toLocaleString()
     };
-    announcements.push(newAnnouncement); // No need to declare 'announcements' again
+    announcements.push(newAnnouncement);
     resolve({ success: true });
   });
 }
