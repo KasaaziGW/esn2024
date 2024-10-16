@@ -279,8 +279,8 @@ document.getElementById('userProfileForm').addEventListener('submit', function (
       if (response.success) {
         document.getElementById('message').textContent="User profile updated successfully!";
       } else {
-        ocument.getElementById('message').textContent="Error updating profile!";
-    })
+        document.getElementById('message').textContent="Error updating profile!";
+    }})
     .catch(error => {
       console.error('Error updating profile:', error);
     })
