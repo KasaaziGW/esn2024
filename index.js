@@ -234,7 +234,7 @@ if (!isAdminLoggedIn) {
 
   // Redirect to login page or home page
   
-  window.location.href = '/login';
+  window.location.href = '/login.html';
 }
 
 // Fetch user data 
@@ -261,57 +261,47 @@ document.getElementById('userProfileForm').addEventListener('submit', function (
     password: user.password,
     email: document.getElementById('email').value,
     role: document.getElementById('role').value
-  }
-}
+  };
   //validate fields by rules
 
   if(!username.match(/^[a-zA-Z0-9]+$/)) {
     alert("invalid username. please follow the username rules.");
     return;
   }
-  {if(password && password.length<6) {
+  if(password && password.length<6) {
     alert("password must be at least 6 characters long");
     return;
   }
   // Send the updated data to the server or simulating server update 
 
   updateUserProfile(username, accountStatus, priviledgeRole, password)
-    .then (response => {
+    .then(response => {
       if (response.success) {
         document.getElementById('message').textContent="User profile updated successfully!";
       } else {
-        document.getElementById('message').textContent="Error updating profile!";
+        ocument.getElementById('message').textContent="Error updating profile!";
     })
     .catch(error => {
       console.error('Error updating profile:', error);
     })
 });
 
+
 // Server update function for sending updated user profile data
 
-function updateUserProfile(username, status, priviledgeRole, password) {
-  return new Promise(resolve, reject) => {
+function updateUserProfile(username, accountStatus, priviledgeRole, password) {
+  return new Promise((resolve, reject) => {
+    // Simulate async operation, e.g., API call to update the profile
+    const isSuccess = true; // Replace with actual condition
 
-    // Simulating an asynchronous server request
-
-    setTimeout(() => {
-function updateUserProfile(userData) {
-    return fetch('/api/updateUserProfile', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(userData)
-    })
-      .then(response => response.json())
-      .catch(error => {
-        console.error('Error updating profile:', error);
-        throw error;
-      });
-  }       
+    if (isSuccess) {
+      resolve({ success: true });
+    } else {
+      reject(new Error("Profile update failed"));
     }
-  }
+  });
 }
+
 
 // Check if a user has 'Coordinator' privilege
 const userPrivilege = 'coordinator';
@@ -370,7 +360,6 @@ function displayAnnouncements() {
 }
 
 // Function to post an announcement
-
 function postAnnouncement(text) {
   return new Promise((resolve) => {
     const newAnnouncement = {
@@ -378,7 +367,9 @@ function postAnnouncement(text) {
       author: 'Coordinator',
       timestamp: new Date().toLocaleString()
     };
-    announcements.push(newAnnouncement);
+    announcements.push(newAnnouncement); // No need to declare 'announcements' again
     resolve({ success: true });
   });
 }
+
+ 
