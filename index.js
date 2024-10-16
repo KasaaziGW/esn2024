@@ -272,7 +272,7 @@ document.getElementById('userProfileForm').addEventListener('submit', function (
     alert("password must be at least 6 characters long");
     return;
   }
-  // Send the updated data to the server or simulating server update 
+  // Sending the updated data to the server or simulating server update 
 
   updateUserProfile(username, accountStatus, priviledge, password)
     .then(response => {
