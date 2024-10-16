@@ -234,7 +234,7 @@ if (!isAdminLoggedIn) {
 
   // Redirect to login page or home page
   
-  window.location.href = '/login.html';
+  window.location.href = '/login';
 }
 
 // Fetch user data 
@@ -274,7 +274,7 @@ document.getElementById('userProfileForm').addEventListener('submit', function (
   }
   // Send the updated data to the server or simulating server update 
 
-  updateUserProfile(username, accountStatus, priviledgeRole, password)
+  updateUserProfile(username, accountStatus, priviledge, password)
     .then(response => {
       if (response.success) {
         document.getElementById('message').textContent="User profile updated successfully!";
@@ -286,12 +286,11 @@ document.getElementById('userProfileForm').addEventListener('submit', function (
     })
 });
 
-
 // Server update function for sending updated user profile data
 
-function updateUserProfile(username, accountStatus, priviledgeRole, password) {
+function updateUserProfile(username, accountStatus, priviledge, password) {
   return new Promise((resolve, reject) => {
-    // Simulate async operation, e.g., API call to update the profile
+    // Simulate async operation, API call to update the profile
     const isSuccess = true; // Replace with actual condition
 
     if (isSuccess) {
@@ -301,7 +300,6 @@ function updateUserProfile(username, accountStatus, priviledgeRole, password) {
     }
   });
 }
-
 
 // Check if a user has 'Coordinator' privilege
 const userPrivilege = 'coordinator';
