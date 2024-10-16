@@ -214,7 +214,7 @@ socketIO.on('connection', (socket)=>{
 });
 
 
-
+/*
 // Backend Code (Single Route for Search and Autocomplete):
 // Search Route and autcomplete route
 // handle the autocomplete logic directly within the existing search route. This way, the same route can 
@@ -292,6 +292,52 @@ app.post('/search', async (request, response) => {
       // No matching records found
       response.json({ success: false, message: 'No matching records found' });
   }
+});*/
+
+// Backend Code (Single Route for Search and Autocomplete):
+// Search Route and autcomplete route
+// handle the autocomplete logic directly within the existing search route. This way, the same route can 
+// provide both search results and suggestions based on the input length or some other criteria.
+app.post('/search', async (req, res) => {
+  const searchCriteria = req.body.searchCriteria;
+
+  // Check if searchCriteria is provided
+  if (!searchCriteria) {
+      return res.json({ success: false, message: 'No search criteria provided' });
+  }
+
+  // Search for a citizen by either fullname or username
+  const citizen = await Citizen.findOne({
+      $or: [
+          { fullname: new RegExp(searchCriteria, 'i') },  // Search by fullname (case-insensitive)
+          { username: new RegExp(searchCriteria, 'i') }   // Search by username (case-insensitive)
+      ]
+  }).exec();
+
+  // If a citizen is found, fetch their messages
+  if (citizen) {
+      const searchFullname = citizen.fullname;  // We will use the citizen's fullname for message lookup
+
+      // Fetch messages where sender matches the citizen's fullname
+      const messages = await Message.find({
+          sender: searchFullname  // Use fullname for message lookup
+      }).exec();
+
+      // Return the citizen's details along with their messages
+      return res.json({
+          success: true,
+          results: [{
+              username: citizen.username,
+              fullname: citizen.fullname,
+              status: citizen.status,
+              statusLastUpdated: citizen.statusLastUpdated,
+              messages: messages  // Attach the fetched messages array
+          }]
+      });
+  } else {
+      // If no citizen is found, return a no matching records response
+      return res.json({ success: false, message: 'No matching records found' });
+  }
 });
 
 
@@ -299,38 +345,50 @@ app.post('/search', async (request, response) => {
 // Route to handle status update
 app.post('/status', async (request, response) => {
   try {
-      // Access userId from the session instead of the request body
-      const userId = request.session.uid;
+      // Access userEmail from the session (you can change this based on how you manage sessions)
+      const userEmail = request.session.userEmail;  // Assuming you store the user's email in the session
       const { status } = request.body;  // Only get the status from the request body
 
-      // Log to confirm if userId and status are passed correctly
-      console.log("Received userId:", userId);
+      // Log to confirm if email and status are passed correctly
+      console.log("Received email:", userEmail);
       console.log("Received status:", status);
 
-      // Validate the status
+      // Validate the status to ensure it is within the valid statuses
       const validStatuses = ['OK', 'Help', 'Emergency', 'Undefined'];
-      // Check if the provided status is not part of the validStatuses array
-      // This checks whether the status provided in the request is not part of the validStatuses array (using includes() to see if the value exists).
       if (!validStatuses.includes(status)) {
-        // If the status is invalid, return a 400 Bad Request response with an error message
-        return response.status(400).json({ success: false, message: 'Invalid status' });
+          return response.status(400).json({ success: false, message: 'Invalid status' });
       }
 
-
-      // Update citizen's status in the database
-      const updatedCitizen = await Citizen.findByIdAndUpdate(userId, { status: status }, { new: true });
-      //find another way of method of updating using the field not use find by ID NUT 
+      // Update the citizen's status using their email as the filter
+      const updatedCitizen = await Citizen.findOneAndUpdate(
+          { email: userEmail },  // Use email to find the citizen in the database
+          { status: status },    // Update the status field with the new value
+          { new: true }          // Return the updated citizen object after the update
+      );
 
       if (updatedCitizen) {
-          response.json({ success: true, message: 'Status updated successfully', citizen: updatedCitizen });
+        // Extract the 'fullname' property from the updated citizen object
+      // This will be used to include the full name in the success response message.  
+          const fullName = updatedCitizen.fullname; 
+
+          // Append the full name to the success message
+          response.json({
+              success: true,
+              message: ` ${fullName} Your status is successfully updated`,  // Including full name in the message
+              citizen: updatedCitizen  // Sending the updated citizen object in the response
+          });
       } else {
+          // If no citizen was found with the provided email
           response.status(404).json({ success: false, message: 'Citizen not found' });
       }
   } catch (error) {
+      // Handling errors that may occur during the process
       console.error('Error updating status:', error);
       response.status(500).json({ success: false, message: 'Server error' });
   }
 });
+
+
 
 
 

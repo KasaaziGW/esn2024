@@ -336,16 +336,21 @@ input[type=password]:placeholder {
 
 #results-list {
     list-style-type: none;
-    padding: 0;
+    padding: 1rem;
+    max-height: 180px; /* Set the max height you desire */
+    overflow-y: auto;  /* Enable vertical scrolling when content exceeds the max height */
 }
 
-#results-list li {
+#results-list div {
     padding: 10px;
     margin: 5px 0;
     border: 1px solid #ddd;
     border-radius: 4px;
     background-color: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+#results-list div:hover{
+    background-color: #d4d0e5;
 }
 
 

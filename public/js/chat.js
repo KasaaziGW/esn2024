@@ -62,6 +62,7 @@ $(() => {
           $('#typing').text("")
       })
     })
+    /*
   // JavaScript code that handles the search input, fetches autocomplete suggestions, and displays search results
   // Wait until the entire DOM content is loaded before executing the script
   document.addEventListener('DOMContentLoaded', () => {
@@ -195,7 +196,9 @@ $(() => {
           resultsList.innerHTML = '<li>Error fetching results</li>'; // Display error message in the results list
       }
     });
-  });
+  });*/
+
+  
 
 });
 
