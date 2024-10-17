@@ -345,12 +345,13 @@ app.post('/search', async (req, res) => {
 // Route to handle status update
 app.post('/status', async (request, response) => {
   try {
-      // Access userEmail from the session (you can change this based on how you manage sessions)
-      const userEmail = request.session.userEmail;  // Assuming you store the user's email in the session
+      // Access userEmail (which is actually the username) from the session
+      const userEmail = request.session.uid;  // Use session.uid to get the user's username
+
       const { status } = request.body;  // Only get the status from the request body
 
-      // Log to confirm if email and status are passed correctly
-      console.log("Received email:", userEmail);
+      // Log to confirm if email (username) and status are passed correctly
+      console.log("Received username:", userEmail);
       console.log("Received status:", status);
 
       // Validate the status to ensure it is within the valid statuses
@@ -359,26 +360,26 @@ app.post('/status', async (request, response) => {
           return response.status(400).json({ success: false, message: 'Invalid status' });
       }
 
-      // Update the citizen's status using their email as the filter
+      // Update the citizen's status using their username as the filter
       const updatedCitizen = await Citizen.findOneAndUpdate(
-          { email: userEmail },  // Use email to find the citizen in the database
+          { username: userEmail },  // Use 'username' to find the citizen in the database
           { status: status },    // Update the status field with the new value
           { new: true }          // Return the updated citizen object after the update
       );
 
       if (updatedCitizen) {
         // Extract the 'fullname' property from the updated citizen object
-      // This will be used to include the full name in the success response message.  
-          const fullName = updatedCitizen.fullname; 
+        const fullName = updatedCitizen.fullname; 
 
-          // Append the full name to the success message
-          response.json({
-              success: true,
-              message: ` ${fullName} Your status is successfully updated`,  // Including full name in the message
-              citizen: updatedCitizen  // Sending the updated citizen object in the response
-          });
+        // Append the full name to the success message
+        response.json({
+            success: true,
+            message: `${fullName}, Your status is successfully updated to <span style="background-color: #7a6dae; padding: 2px 4px; color: #fff;border-radius: 4px;font-weight: bold;font-size: 1.1em;">${status.toUpperCase()}</span>`,
+            // Including full name in the message
+            citizen: updatedCitizen  // Sending the updated citizen object in the response
+        });
       } else {
-          // If no citizen was found with the provided email
+          // If no citizen was found with the provided username
           response.status(404).json({ success: false, message: 'Citizen not found' });
       }
   } catch (error) {
@@ -387,6 +388,7 @@ app.post('/status', async (request, response) => {
       response.status(500).json({ success: false, message: 'Server error' });
   }
 });
+
 
 
 

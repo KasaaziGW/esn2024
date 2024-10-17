@@ -10,24 +10,66 @@
         <%- include('templates/nav'); %>
         <div class="d-flex flex-column flex-shrink-0 p-3" style="width: 100%;">
             <div class="status-update-container">
-        
-                <form id="status-form" action="/status" method="POST" >
+                <form id="status-form" action="/status" method="POST">
                     <label for="status-select"><%= data.fullname %>&nbsp;Select Your Status:</label>
-                    <select id="status-select" name="status"> 
+                    <select id="status-select" name="status">
                         <option value="Undefined" selected>Undefined</option>
                         <option value="OK">OK</option>
                         <option value="Help">Help</option>
                         <option value="Emergency">Emergency</option>
                     </select>
-                    <input type="hidden" id="user-id" value="<%= data.userid %>">
                     <button type="submit">Update Status</button>
-                </form>            
-                <div id="status-message" style="padding-top: 2rem;"></div> <!-- This will show the update status message -->
+                </form>
+                <div id="status-message" style="padding-top: 2rem; color: green;"></div> <!-- This will show the update status message -->
             </div>
         </div>
-        
     </main>
     <%- include('templates/footer'); %>
     <script src="js/chat.js"></script>
+    <script>
+    // Add an event listener to the form's submit event
+        document.getElementById('status-form').addEventListener('submit', function(event) {
+            event.preventDefault();  // Prevent the default form submission behavior
+        
+            // Get the selected status value from the dropdown
+            const status = document.getElementById('status-select').value;
+        
+            // Send a POST request to the server to update the user's status
+            fetch('/status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: status })  // Send the status as JSON
+            })
+            .then(response => response.json())  // Parse the JSON response from the server
+            .then(data => {
+                // Get the DOM element to display the status update message
+                const statusMessage = document.getElementById('status-message');
+        
+                // If the server responds with success, show the success message
+                if (data.success) {
+                    statusMessage.style.color = 'green';  // Set text color to green for success
+                    
+                    // Display the success message with styled status using innerHTML
+                    statusMessage.innerHTML = data.message;  // Now it renders the HTML, including <span> for background color
+                } else {
+                    // If there is an error, display the error message
+                    statusMessage.style.color = 'red';  // Set text color to red for errors
+                    statusMessage.textContent = `Error: ${data.message}`;
+                }
+            })
+            .catch(error => {
+                // Log any errors in the console
+                console.error('Error updating status:', error);
+        
+                // Update the status message to inform the user of an error
+                const statusMessage = document.getElementById('status-message');
+                statusMessage.style.color = 'red';
+                statusMessage.textContent = "Error updating status. Please try again.";
+            });
+        });
+        
+    </script>
 </body>
 </html>

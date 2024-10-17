@@ -63,159 +63,147 @@ $(() => {
       })
     })
     /*
-  // JavaScript code that handles the search input, fetches autocomplete suggestions, and displays search results
-  // Wait until the entire DOM content is loaded before executing the script
-  document.addEventListener('DOMContentLoaded', () => {
-    // Get references to various DOM elements in the HTML file
-    const searchForm = document.getElementById('search-form'); // The search form
-    const searchInput = document.getElementById('search-criteria'); // The input field where user types search query
-    const suggestionBox = document.getElementById('suggestion-box'); // The div where autocomplete suggestions will appear
-    const resultsList = document.getElementById('results-list');  // The element where full search results will be displayed      
+    // JavaScript code that handles the search input, fetches autocomplete suggestions, and displays search results
+    // Wait until the entire DOM content is loaded before executing the script
+    document.addEventListener('DOMContentLoaded', () => {
+      // Get references to various DOM elements in the HTML file
+      const searchForm = document.getElementById('search-form'); // The search form
+      const searchInput = document.getElementById('search-criteria'); // The input field where user types search query
+      const suggestionBox = document.getElementById('suggestion-box'); // The div where autocomplete suggestions will appear
+      const resultsList = document.getElementById('results-list');  // The element where full search results will be displayed      
 
-    let typingTimer; // Timer to manage debounce effect for search input
-    const typingDelay = 300; // Time (in milliseconds) to wait after the user stops typing before sending a request
+      let typingTimer; // Timer to manage debounce effect for search input
+      const typingDelay = 300; // Time (in milliseconds) to wait after the user stops typing before sending a request
 
-    // Event listener that triggers when the user types in the search input field
-    searchInput.addEventListener('input', () => {
-        // Clear previous suggestions before displaying new ones
-        suggestionBox.innerHTML = '';
+      // Event listener that triggers when the user types in the search input field
+      searchInput.addEventListener('input', () => {
+          // Clear previous suggestions before displaying new ones
+          suggestionBox.innerHTML = '';
 
-        const searchCriteria = searchInput.value.trim(); // Get the input and remove leading/trailing spaces
+          const searchCriteria = searchInput.value.trim(); // Get the input and remove leading/trailing spaces
 
-        // If the user continues typing, clear the previous typing timer to prevent multiple requests
-        clearTimeout(typingTimer);
+          // If the user continues typing, clear the previous typing timer to prevent multiple requests
+          clearTimeout(typingTimer);
 
-        // Set a new typing timer. Once the user stops typing for 300ms, the search is triggered
-        typingTimer = setTimeout(async () => {
-            if (searchCriteria.length < 3) { 
-                // If the input is less than 3 characters, don't make a request (ensures meaningful searches)
-                return;
-            }
+          // Set a new typing timer. Once the user stops typing for 300ms, the search is triggered
+          typingTimer = setTimeout(async () => {
+              if (searchCriteria.length < 3) { 
+                  // If the input is less than 3 characters, don't make a request (ensures meaningful searches)
+                  return;
+              }
 
-            try {
-                // Send a POST request to the server to get autocomplete suggestions based on the search input
-                const response = await fetch('/search', {
-                    method: 'POST', // Use the POST method for the request
-                    headers: {
-                        'Content-Type': 'application/json' // The request sends JSON data
-                    },
-                    body: JSON.stringify({ searchCriteria }) // Send the search input as the request body
-                });
+              try {
+                  // Send a POST request to the server to get autocomplete suggestions based on the search input
+                  const response = await fetch('/search', {
+                      method: 'POST', // Use the POST method for the request
+                      headers: {
+                          'Content-Type': 'application/json' // The request sends JSON data
+                      },
+                      body: JSON.stringify({ searchCriteria }) // Send the search input as the request body
+                  });
 
-                // Parse the JSON response from the server
-                const data = await response.json();
+                  // Parse the JSON response from the server
+                  const data = await response.json();
 
-                // Check if the response indicates success and if there are results
-                if (data.success && data.results) {
-                    // For each result, create a new suggestion item and append it to the suggestion box
-                    data.results.forEach(result => {
-                        const suggestionItem = document.createElement('div'); // Create a new div for each suggestion
-                        suggestionItem.classList.add('suggestion-item'); // Add a CSS class for styling
-                        suggestionItem.textContent = result.fullname; // Set the content of the suggestion to the citizen's full name
+                  // Check if the response indicates success and if there are results
+                  if (data.success && data.results) {
+                      // For each result, create a new suggestion item and append it to the suggestion box
+                      data.results.forEach(result => {
+                          const suggestionItem = document.createElement('div'); // Create a new div for each suggestion
+                          suggestionItem.classList.add('suggestion-item'); // Add a CSS class for styling
+                          suggestionItem.textContent = result.fullname; // Set the content of the suggestion to the citizen's full name
 
-                        // When a suggestion is clicked, set the search input value to the selected full name and clear suggestions
-                        suggestionItem.onclick = () => {
-                            searchInput.value = result.fullname; // Set the search input to the clicked suggestion
-                            suggestionBox.innerHTML = ''; // Clear the suggestion box after selection
-                        };
-                        suggestionBox.appendChild(suggestionItem); // Add the suggestion to the suggestion box
-                    });
-                } else {
-                    // If no suggestions are found, display a "No suggestions found" message
-                    suggestionBox.innerHTML = '<div class="suggestion-item">No suggestions found</div>';
-                }
-            } catch (error) {
-                // Log any error that occurs while fetching suggestions
-                console.error('Error fetching suggestions:', error);
-                suggestionBox.innerHTML = '<div class="suggestion-item">Error fetching suggestions</div>'; // Display error message
-            }
-        }, typingDelay); // Delay the request until after 300ms of inactivity
-    });
-
-    // Event listener that triggers when the search form is submitted
-    searchForm.addEventListener('submit', async (event) => {
-      event.preventDefault(); // Prevent the form from submitting the usual way (refreshing the page)
-
-      const searchCriteria = searchInput.value.trim(); // Get the input value and remove unnecessary spaces
-
-      try {
-          // Send a POST request to perform a full search with the given search criteria
-          const response = await fetch('/search', {
-            method: 'POST', // Use POST method for the request
-            headers: {
-                'Content-Type': 'application/json' // Specify the content type as JSON
-            },
-            body: JSON.stringify({ searchCriteria }) // Send the search criteria to the server
-          });
-
-          const data = await response.json(); // Parse the response from the server as JSON
-
-          // Clear any previous results from the result list
-          resultsList.innerHTML = '';
-
-          // Check if the response was successful and contains results
-          if (data.success && data.results) {
-              // Loop over each search result and display it
-              data.results.forEach(result => {
-                  const listItem = document.createElement('li'); // Create a new list item for each search result
-
-                  // Display the citizen's full name and username/email in the list item
-                  listItem.innerHTML = `<strong>${result.citizen.fullname}</strong> - ${result.citizen.username}`;
-                  
-                  // Create a nested list to show the last 10 messages for each citizen
-                  const messageList = document.createElement('ul'); // Create a new unordered list for messages
-                  messageList.classList.add('message-list');  // Add a CSS class for styling purposes
-
-                  if (result.messages.length > 0) {
-                      // If messages exist, loop through them and display each one
-                      result.messages.forEach(message => {
-                          const messageItem = document.createElement('li'); // Create a new list item for each message
-                          messageItem.textContent = `${message.sentTime}: ${message.message}`; // Display message sent time and content
-                          messageList.appendChild(messageItem); // Append the message to the message list
+                          // When a suggestion is clicked, set the search input value to the selected full name and clear suggestions
+                          suggestionItem.onclick = () => {
+                              searchInput.value = result.fullname; // Set the search input to the clicked suggestion
+                              suggestionBox.innerHTML = ''; // Clear the suggestion box after selection
+                          };
+                          suggestionBox.appendChild(suggestionItem); // Add the suggestion to the suggestion box
                       });
                   } else {
-                      // If no messages are found, display a message indicating that
-                      const noMessagesItem = document.createElement('li');
-                      noMessagesItem.textContent = 'No messages found.'; // Inform that no messages exist
-                      messageList.appendChild(noMessagesItem); // Append to the message list
+                      // If no suggestions are found, display a "No suggestions found" message
+                      suggestionBox.innerHTML = '<div class="suggestion-item">No suggestions found</div>';
                   }
+              } catch (error) {
+                  // Log any error that occurs while fetching suggestions
+                  console.error('Error fetching suggestions:', error);
+                  suggestionBox.innerHTML = '<div class="suggestion-item">Error fetching suggestions</div>'; // Display error message
+              }
+          }, typingDelay); // Delay the request until after 300ms of inactivity
+      });
 
-                  // Append the message list (with all messages) to the main list item (citizen)
-                  listItem.appendChild(messageList);
+      // Event listener that triggers when the search form is submitted
+      searchForm.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Prevent the form from submitting the usual way (refreshing the page)
 
-                  // Append the main list item (citizen + messages) to the results list
-                  resultsList.appendChild(listItem);
-              });
-          } else {
-              // If no results are found, display a message indicating that
-              resultsList.innerHTML = '<li>No results found</li>';
-          }
-      } catch (error) {
-          // Log any error that occurs while fetching the full search results
-          console.error('Error fetching results:', error);
-          resultsList.innerHTML = '<li>Error fetching results</li>'; // Display error message in the results list
-      }
-    });
-  });*/
+        const searchCriteria = searchInput.value.trim(); // Get the input value and remove unnecessary spaces
 
-  
+        try {
+            // Send a POST request to perform a full search with the given search criteria
+            const response = await fetch('/search', {
+              method: 'POST', // Use POST method for the request
+              headers: {
+                  'Content-Type': 'application/json' // Specify the content type as JSON
+              },
+              body: JSON.stringify({ searchCriteria }) // Send the search criteria to the server
+            });
 
-});
+            const data = await response.json(); // Parse the response from the server as JSON
 
+            // Clear any previous results from the result list
+            resultsList.innerHTML = '';
 
+            // Check if the response was successful and contains results
+            if (data.success && data.results) {
+                // Loop over each search result and display it
+                data.results.forEach(result => {
+                    const listItem = document.createElement('li'); // Create a new list item for each search result
 
+                    // Display the citizen's full name and username/email in the list item
+                    listItem.innerHTML = `<strong>${result.citizen.fullname}</strong> - ${result.citizen.username}`;
+                    
+                    // Create a nested list to show the last 10 messages for each citizen
+                    const messageList = document.createElement('ul'); // Create a new unordered list for messages
+                    messageList.classList.add('message-list');  // Add a CSS class for styling purposes
+
+                    if (result.messages.length > 0) {
+                        // If messages exist, loop through them and display each one
+                        result.messages.forEach(message => {
+                            const messageItem = document.createElement('li'); // Create a new list item for each message
+                            messageItem.textContent = `${message.sentTime}: ${message.message}`; // Display message sent time and content
+                            messageList.appendChild(messageItem); // Append the message to the message list
+                        });
+                    } else {
+                        // If no messages are found, display a message indicating that
+                        const noMessagesItem = document.createElement('li');
+                        noMessagesItem.textContent = 'No messages found.'; // Inform that no messages exist
+                        messageList.appendChild(noMessagesItem); // Append to the message list
+                    }
+
+                    // Append the message list (with all messages) to the main list item (citizen)
+                    listItem.appendChild(messageList);
+
+                    // Append the main list item (citizen + messages) to the results list
+                    resultsList.appendChild(listItem);
+                });
+            } else {
+                // If no results are found, display a message indicating that
+                resultsList.innerHTML = '<li>No results found</li>';
+            }
+        } catch (error) {
+            // Log any error that occurs while fetching the full search results
+            console.error('Error fetching results:', error);
+            resultsList.innerHTML = '<li>Error fetching results</li>'; // Display error message in the results list
+        }
+      });
+    });*/
+/*
     // Add an event listener to the form's submit event when a user selects a status
     document.getElementById('status-form').addEventListener('submit', function(event) {
       event.preventDefault();  // Prevent the default form submission behavior
 
       // Get the selected status value from the dropdown
       const status = document.getElementById('status-select').value;
-      
-      // Get the userId from a hidden input field in the form
-      const userId = document.getElementById('user-id').value;
-
-      // Log the userId to the console for debugging purposes
-      console.log('User ID:', userId);
 
       // Send a POST request to the server to update the user's status
       fetch('/status', {
@@ -223,17 +211,17 @@ $(() => {
           headers: {
               'Content-Type': 'application/json'  // Indicate that the request body will be in JSON format
           },
-          // Convert the userId and status into a JSON string to send as the request body
-          body: JSON.stringify({ userId: userId, status: status })  
+          // Send only the selected status as the request body since username is taken from the session
+          body: JSON.stringify({ status: status })
       })
       .then(response => response.json())  // Parse the JSON response from the server
       .then(data => {
           // Get the DOM element to display the status update message
           const statusMessage = document.getElementById('status-message');
-          
+
           // If the server responds with success, update the message accordingly
           if (data.success) {
-              statusMessage.textContent = "Status updated successfully!";
+              statusMessage.textContent = data.message;  // Use the message from the server response
           } else {
               // If there is an error, display the error message from the server response
               statusMessage.textContent = `Error: ${data.message}`;
@@ -246,10 +234,10 @@ $(() => {
           // Update the status message to inform the user of an error
           document.getElementById('status-message').textContent = "Error updating status.";
       });
-    });
+    });*/
 
   });
-});
+}); 
 
 
 
