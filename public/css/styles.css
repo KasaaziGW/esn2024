@@ -461,3 +461,9 @@ input[type=password]:placeholder {
     font-size: 1.1em;
     text-transform: uppercase;  /* Capitalize status */
 }
+.delivered-tick {
+    font-size: 12px;
+    color: green; /* Make the tick green */
+    margin-left: 5px;
+}
+

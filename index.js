@@ -374,7 +374,7 @@ app.post('/status', async (request, response) => {
         // Append the full name to the success message
         response.json({
             success: true,
-            message: `${fullName}, Your status is successfully updated to <span style="background-color: #7a6dae; padding: 2px 4px; color: #fff;border-radius: 4px;font-weight: bold;font-size: 1.1em;">${status.toUpperCase()}</span>`,
+            message: `${fullName}, your status is successfully updated to <span style="background-color: #7a6dae; padding: 2px 4px; color: #fff;border-radius: 4px;font-weight: bold;font-size: 1.1em;">${status.toUpperCase()}</span>`,
             // Including full name in the message
             citizen: updatedCitizen  // Sending the updated citizen object in the response
         });
@@ -388,6 +388,7 @@ app.post('/status', async (request, response) => {
       response.status(500).json({ success: false, message: 'Server error' });
   }
 });
+
 
 
 
@@ -459,6 +460,35 @@ app.get("/logout", (request, response) => {
   response.redirect("/");
 });
 
+// Save the message to the database and emit to clients
+app.post("/saveMessage", async (request, response) => {
+  try {
+    // Create a new message from the request body
+    var message = new Message(request.body);
+
+    // Save the message to the database
+    await message.save();
+
+    // Emit the "message" event to all connected clients to display the message
+    socketIO.emit("message", message);
+
+    // Simulate message delivery after a delay (e.g., 5 seconds)
+    setTimeout(() => {
+      // Emit the 'messageDelivered' event after message delivery, including the message ID
+      socketIO.emit("messageDelivered", message._id.toString()); // Ensure message._id is sent as a string
+    }, 5000); // Simulate a 5-second delay before message delivery
+
+    response.sendStatus(200);
+  } catch (error) {
+    console.error("Error saving message:", error);
+    response.sendStatus(500);
+  }
+});
+
+
+
+
+/*
 // saving the message to the database
 app.post("/saveMessage", async (request, response) => {
   // create an object from the model
@@ -467,7 +497,7 @@ app.post("/saveMessage", async (request, response) => {
   // emit an event to the front end for displaying a sent message
   socketIO.emit("message", message);
   response.sendStatus(200);
-});
+}); */
 
 // fetching the messages from the database
 app.get("/fetchMessages", async (request, response) => {

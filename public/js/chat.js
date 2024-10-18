@@ -251,30 +251,93 @@ function getMessages() {
   scrollContainer();
 }
 
-// listening to the "message" event
-socket.on("message", displayMessage);
-// function for diplaying the message on the screen
+// Listen for the "message" event from the server (real-time message update)
+socket.on("message", function (message) {
+  displayMessage(message);  // Call the function to display the new message in the chat
+});
+
+// Listen for the "messageDelivered" event from the server to update delivery status
+socket.on("messageDelivered", function (messageId) {
+  // Locate the message in the DOM using its data-message-id attribute and update the tick marks
+  const deliveredTick = $(`[data-message-id="${messageId}"] .delivered-tick`);
+
+  // If the message is found, update its tick status to show it is delivered
+  if (deliveredTick.length) {
+      deliveredTick.text("✔✔");  // Show double tick for delivered message
+      deliveredTick.css("color", "blue");  // Optionally change the color to blue for read status
+  } else {
+      console.error("Message element not found for ID:", messageId);
+  }
+});
+
+// Function to display a message in the chat window
 function displayMessage(message) {
   var fullname = document.querySelector("#fullname").textContent;
-  if (message.sender == fullname) {
-    $("#messages").append(`<div id="messageContainer1">
-                              <div id="messageHeader">
-                              <div id="senderName">Me</div>
-                              <div id="sentTime">${message.sentTime}</div>
-                              </div>
-                              <p>${message.message}</p>
-                              </div>`);
+
+  // Check if the message sender is the current user
+  if (message.sender === fullname) {
+      // Initially show a single tick (message sent but not delivered yet)
+      let tickMarks = "✔";  // Single tick initially (for sent status)
+      let tickColor = "black";  // Default color for the sent message
+
+      $("#messages").append(`<div id="messageContainer1" data-message-id="${message._id}">
+                                <div id="messageHeader">
+                                    <div id="senderName">Me</div>
+                                    <div id="sentTime">${message.sentTime}</div>
+                                </div>
+                                <p>${message.message}</p>
+                                <div id="deliveredStatus" class="delivered-tick" style="color: ${tickColor};">${tickMarks}</div>
+                            </div>`);
   } else {
-    $("#messages").append(`<div id="messageContainer">
-                              <div id="messageHeader">
-                              <div id="senderName">${message.sender}</div>
-                              <div id="sentTime">${message.sentTime}</div>
-                              </div>
-                              <p>${message.message}</p>
-                              </div>`);
+      // Append other people's messages (no tick marks)
+      $("#messages").append(`<div id="messageContainer">
+                                <div id="messageHeader">
+                                    <div id="senderName">${message.sender}</div>
+                                    <div id="sentTime">${message.sentTime}</div>
+                                </div>
+                                <p>${message.message}</p>
+                            </div>`);
   }
+
+  // Call the function to scroll the container to the latest message
   scrollContainer();
 }
+
+// Automatically scroll to the latest message
+function scrollContainer() {
+  var messageContainer = document.getElementById("messages");
+  messageContainer.scrollTop = messageContainer.scrollHeight; // Scroll to the bottom
+}
+
+
+// Automatically scroll to the latest message
+function scrollContainer() {
+  var messageContainer = document.getElementById("messages");
+  messageContainer.scrollTop = messageContainer.scrollHeight; // Scroll to the bottom
+}
+
+
+
+
+// Fetch all previous messages when the client reloads the page or logs in
+fetch("/getMessages")
+  .then(response => response.json())
+  .then(messages => {
+      // Loop through all the messages and display them
+      messages.forEach(displayMessage);
+  })
+  .catch(error => {
+      console.error("Error fetching messages:", error);
+  });
+
+
+
+// A function to scroll the message container to the latest message
+function scrollContainer() {
+    const messageContainer = document.getElementById("messages");
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+}
+
 // function to get the current date and time
 function getCurrentTime() {
   var today = new Date();
