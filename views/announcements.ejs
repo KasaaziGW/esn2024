@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('templates/head'); %>
+    <title>Announcements</title>
+</head>
+<body>
+    <%- include('templates/header'); %>
+    <main class="d-flex flex-nowrap" style="height:500px;">
+        <%- include('templates/nav'); %>
+        
+
+        <section class="announcement-section">
+            <!-- Announcement Input Form -->
+            <div class="announcement-form-container">
+                <h2>Make an Announcement</h2>
+                <form id="announcement-form">
+                    <label for="announcement-title">Title</label>
+                    <input type="text" id="announcement-title" name="title" placeholder="Enter announcement title" required>
+
+                    <label for="announcement-description">Description</label>
+                    <textarea id="announcement-description" name="description" placeholder="Enter announcement description" rows="4" required></textarea>
+
+                    <button type="submit" class="announcement-submit-btn">Submit</button>
+                </form>
+            </div>
+
+            <!-- Announcement List -->
+            <div class="announcement-list-container">
+                <h2>Previous Announcements</h2>
+                <ul id="announcement-list">
+                    <li class="announcement-item">
+                        <h3 class="announcement-item-title">Welcome to our new platform!</h3>
+                        <p class="announcement-item-description">We are excited to announce the launch of our brand new platform. Stay tuned for updates!</p>
+                        <span class="announcement-item-date">Posted on: October 20, 2024</span>
+                    </li>
+                    <li class="announcement-item">
+                        <h3 class="announcement-item-title">Maintenance Notice</h3>
+                        <p class="announcement-item-description">Our platform will undergo maintenance on October 22, 2024. Please expect downtime between 2 AM and 4 AM.</p>
+                        <span class="announcement-item-date">Posted on: October 18, 2024</span>
+                    </li>
+                </ul>
+            </div>
+        </section>              
+    </main>
+    <%- include('templates/footer'); %>
+    <script src="js/chat.js"></script>
+
+</body>
+</html>

@@ -409,6 +409,23 @@ app.get("/home", (request, response) => {
   }
 });
 
+
+
+// loading the announcements page
+app.get("/announcements", (request, response) => {
+  session = request.session;
+  // uname = request.session.fullname;
+  if (session.uid && session.fname) {
+    response.render("announcements", {
+      data: {
+        userid: session.uid,
+        fullname: session.fname,
+      },
+    });
+  } else response.redirect("/");
+});
+
+
 // loading the searchinfo page
 app.get("/searchinfo", (request, response) => {
   session = request.session;
@@ -460,23 +477,32 @@ app.get("/logout", (request, response) => {
   response.redirect("/");
 });
 
-// Save the message to the database and emit to clients
+
+
 app.post("/saveMessage", async (request, response) => {
   try {
-    // Create a new message from the request body
-    var message = new Message(request.body);
+    // Create a new message from the request body with default delivery status (false)
+    var message = new Message({
+      sender: request.body.sender,
+      message: request.body.message,
+      sentTime: request.body.sentTime,
+      delivered: false,  // Set delivered status to false initially
+    });
 
     // Save the message to the database
     await message.save();
 
-    // Emit the "message" event to all connected clients to display the message
+    // Emit the message to the client for real-time display
     socketIO.emit("message", message);
 
-    // Simulate message delivery after a delay (e.g., 5 seconds)
-    setTimeout(() => {
-      // Emit the 'messageDelivered' event after message delivery, including the message ID
-      socketIO.emit("messageDelivered", message._id.toString()); // Ensure message._id is sent as a string
-    }, 5000); // Simulate a 5-second delay before message delivery
+    // Simulate message delivery after 5 seconds
+    setTimeout(async () => {
+      // Update the message's delivered status in the database
+      await Message.findByIdAndUpdate(message._id, { delivered: true });
+
+      // Emit the 'messageDelivered' event to the front end to update ticks
+      socketIO.emit("messageDelivered", message._id);
+    }, 5000);  // Simulate a 5-second delivery delay
 
     response.sendStatus(200);
   } catch (error) {
@@ -484,6 +510,23 @@ app.post("/saveMessage", async (request, response) => {
     response.sendStatus(500);
   }
 });
+
+
+
+
+// Fetch the existing messages when the user reloads or logs in
+app.get("/messages", async (request, response) => {
+  try {
+    // Retrieve all messages from the database
+    const messages = await Message.find();
+    response.json(messages);
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    response.status(500).json({ error: "Failed to fetch messages" });
+  }
+});
+
+
 
 
 
