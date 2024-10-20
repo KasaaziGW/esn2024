@@ -6,7 +6,7 @@
 </head>
 <body>
     <%- include('templates/header'); %>
-    <main class="d-flex flex-nowrap" style="height:500px;">
+    <main class="d-flex flex-nowrap" style="height:600px;">
         <%- include('templates/nav'); %>
         
 
@@ -15,8 +15,10 @@
             <div class="announcement-form-container">
                 <h2>Make an Announcement</h2>
                 <form id="announcement-form">
-                    <label for="announcement-title">Title</label>
-                    <input type="text" id="announcement-title" name="title" placeholder="Enter announcement title" required>
+                  <label for="announcement-title">Announcement Title</label>
+                  <input type="text" id="announcement-title" name="title" placeholder="Enter announcement title" required>
+                    <label for="announcement-title">Author</label>
+                    <input type="text" id="announcement-title" name="title" value="<%= data.fullname %>">
 
                     <label for="announcement-description">Description</label>
                     <textarea id="announcement-description" name="description" placeholder="Enter announcement description" rows="4" required></textarea>
@@ -47,4 +49,4 @@
     <script src="js/chat.js"></script>
 
 </body>
-</html>
+</html> 

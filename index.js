@@ -5,6 +5,7 @@ const sessions = require("express-session");
 const mongoose = require("mongoose");
 const { Citizen } = require("./models/Citizen");
 const { Message } = require("./models/Message");
+const { Announcement } = require("./models/Announcement");
 const bcrypt = require("bcryptjs");
 const PORT = 3300; // the port where our server will be running
 
@@ -388,6 +389,47 @@ app.post('/status', async (request, response) => {
       response.status(500).json({ success: false, message: 'Server error' });
   }
 });
+
+// saving the announcements
+app.post('/saveAnnouncement', async (req, res) => {
+  try {
+    const announcement = new Announcement({
+      title: req.body.title,
+      description: req.body.description,
+      author: req.session.fullname,  // Get the citizen's full name from session
+      createdDate: new Date()  // Automatically set the creation date
+    });
+    await announcement.save();
+
+    // Emit a socket event to display the announcement in real-time (optional)
+    socketIO.emit('newAnnouncement', announcement);
+
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Error saving announcement:', error);
+    res.sendStatus(500);
+  }
+});
+
+// Retrieving the announcements
+app.get('/announcements', async (req, res) => {
+  try {
+    // Get the logged-in user's fullname from the session
+    const fullname = req.session.fname;  // Assuming the fullname is stored in the session
+
+    // Fetch the announcements and sort them by the most recent
+    const announcements = await Announcement.find().sort({ createdDate: -1 });
+
+    // Render the announcements view, passing both announcements and fullname
+    res.render('announcements', { announcements, data: { fullname } });
+  } catch (error) {
+    console.error('Error fetching announcements:', error);
+    res.sendStatus(500);
+  }
+});
+
+
+
 
 
 
