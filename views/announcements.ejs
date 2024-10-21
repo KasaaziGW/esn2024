@@ -7,7 +7,13 @@
 <body>
     <%- include('templates/header'); %>
     <main class="d-flex flex-nowrap" style="height:600px;">
-        <%- include('templates/nav'); %>  
+        <%- include('templates/nav'); %>          
+        <!-- Success message display -->
+        <% if (typeof success !== 'undefined') { %>
+            <div class="alert alert-success" role="alert" style="margin-top: 1.5rem;">
+                <%= success %>
+            </div>
+        <% } %>
         <section class="announcement-section" method="POST" action="/saveAnnouncement">
             <!-- Announcement Input Form -->
             <div class="announcement-form-container">

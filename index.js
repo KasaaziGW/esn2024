@@ -438,50 +438,46 @@ app.post("/saveMessage", async (request, response) => {
 app.post('/saveAnnouncement', async (req, res) => {
   try {
     const { title, description } = req.body;
-    const author = req.session.fname; // Get the logged-in user (author) from session
-
-    // Save the new announcement
+    const author = req.session.fname;  // Get the logged-in user's fullname from session
+    
+    // Create a new announcement
     const newAnnouncement = new Announcement({
       title,
       description,
-      author,
+      author
     });
+    
+    // Save the announcement
+    await newAnnouncement.save();
 
-    const savedAnnouncement = await newAnnouncement.save();
-
-    // Emit the new announcement to all clients
-    socketIO.emit('newAnnouncement', {
-      title: savedAnnouncement.title,
-      description: savedAnnouncement.description,
-      author: savedAnnouncement.author,
-      createdDate: savedAnnouncement.createdDate,
-    });
-
-    res.sendStatus(200);
+    // Redirect to the announcements page with a success message
+    res.redirect('/announcements?success=Your announcement was successfully posted!');
   } catch (error) {
     console.error('Error saving announcement:', error);
-    res.sendStatus(500);
+    res.sendStatus(500);  // Handle the error appropriately
   }
 });
+
 
 
 
 // Retrieving and displaying announcements
 app.get('/announcements', async (req, res) => {
   try {
-    // Get the logged-in user's fullname from the session
-    const fullname = req.session.fname;  // Assume fullname is stored in the session
-
-    // Fetch the announcements and sort them by the most recent
+    const fullname = req.session.fname;  // Get the logged-in user's fullname from session
     const announcements = await Announcement.find().sort({ createdDate: -1 });
 
-    // Render the announcements view, passing both announcements and fullname
-    res.render('announcements', { announcements, data: { fullname } });
+    // Check if there is a success message in the query string
+    const successMessage = req.query.success;
+
+    // Render the announcements view, passing the announcements, fullname, and success message
+    res.render('announcements', { announcements, data: { fullname }, success: successMessage });
   } catch (error) {
     console.error('Error fetching announcements:', error);
     res.sendStatus(500);
   }
 });
+
 
 
 
