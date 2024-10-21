@@ -120,6 +120,8 @@ body {
     list-style: none;
     padding: 0;
     margin: 0;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .announcement-item {
@@ -133,13 +135,22 @@ body {
 
 .announcement-item-title {
     font-size: 1.5em;
-    color: #4CAF50;
+    font-size: 1.5em;
+    color: rgb(122, 109, 174);
+    margin-bottom: 10px;
+}
+.announcement-item-title {
+    font-size: 1.5em;
+    font-size: 1.5em;
+    color: rgb(122, 109, 174);
     margin-bottom: 10px;
 }
 
-.announcement-item-description {
-    font-size: 1.1em;
-    margin-bottom: 10px;
+.announcement-item:hover {
+    background-color: #d4d0e5;
+    border: 1px solid #d4d0e5;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
 }
 
 .announcement-item-date {
@@ -473,7 +484,7 @@ input[type=password]:placeholder {
 #results-list {
     list-style-type: none;
     padding: 1rem;
-    max-height: 180px; /* Set the max height you desire */
+    max-height: 270px; /* Set the max height you desire */
     overflow-y: auto;  /* Enable vertical scrolling when content exceeds the max height */
 }
 
@@ -489,7 +500,15 @@ input[type=password]:placeholder {
     background-color: #d4d0e5;
 }
 
-
+#messageContainer1 {
+    background-color: #f1f1f1;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    max-width: 70%; /* Adjust width to your design */
+}
+#deliveredStatus {
+    float: right;
+}
 
 /* General container styling */
 .status-update-container {

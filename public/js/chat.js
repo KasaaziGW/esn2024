@@ -310,33 +310,6 @@ function scrollContainer() {
 }
 
 
-// Automatically scroll to the latest message
-function scrollContainer() {
-  var messageContainer = document.getElementById("messages");
-  messageContainer.scrollTop = messageContainer.scrollHeight; // Scroll to the bottom
-}
-
-
-
-
-// Fetch all previous messages when the client reloads the page or logs in
-fetch("/getMessages")
-  .then(response => response.json())
-  .then(messages => {
-      // Loop through all the messages and display them
-      messages.forEach(displayMessage);
-  })
-  .catch(error => {
-      console.error("Error fetching messages:", error);
-  });
-
-
-
-// A function to scroll the message container to the latest message
-function scrollContainer() {
-    const messageContainer = document.getElementById("messages");
-    messageContainer.scrollTop = messageContainer.scrollHeight;
-}
 
 // function to get the current date and time
 function getCurrentTime() {

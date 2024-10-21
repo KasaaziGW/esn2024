@@ -390,19 +390,72 @@ app.post('/status', async (request, response) => {
   }
 });
 
-// saving the announcements
+
+
+
+// POST route to save a new message to the database and retrieve the message with the delivered ticks
+app.post("/saveMessage", async (request, response) => {
+  
+  try {
+    // Create a new message object from the request body with initial values
+    var message = new Message({
+      sender: request.body.sender,  // Sender of the message, passed in the request body
+      message: request.body.message,  // Message content, passed in the request body
+      sentTime: request.body.sentTime,  // The time the message was sent, passed in the request body
+      delivered: false,  // Initially set the delivered status to false (not yet delivered)
+    });
+
+    // Save the new message object to the database
+    await message.save();  // Wait for the save operation to complete before proceeding
+
+    // Emit the newly created message to all connected clients in real-time via socketIO
+    socketIO.emit("message", message);  // Send the saved message to the front end using the "message" event
+
+    // Simulate a message delivery delay (e.g., simulating actual delivery after a 5-second delay)
+    setTimeout(async () => {
+      // After 5 seconds, update the message's delivered status to true in the database
+      await Message.findByIdAndUpdate(message._id, { delivered: true });  // Find the message by its ID and update its status to delivered
+
+      // Emit a 'messageDelivered' event to the front end, passing the message ID to update the delivered status
+      socketIO.emit("messageDelivered", message._id);  // Notify clients that the message has been delivered
+
+    }, 5000);  // Set the timeout delay to 5 seconds (simulating the time it takes to deliver the message)
+
+    // Send a success response to the client, indicating that the message was saved and processed
+    response.sendStatus(200);  // Send HTTP status 200 (OK) back to the client to signal success
+
+  } catch (error) {
+    // Log any errors that occur during the message saving or delivery process
+    console.error("Error saving message:", error);  // Output the error to the server console for debugging
+
+    // Send an error response to the client, indicating that something went wrong
+    response.sendStatus(500);  // Send HTTP status 500 (Internal Server Error) back to the client if there's an issue
+  }
+});
+
+
+// Save new announcement (POST request)// POST route to save an announcement
 app.post('/saveAnnouncement', async (req, res) => {
   try {
-    const announcement = new Announcement({
-      title: req.body.title,
-      description: req.body.description,
-      author: req.session.fullname,  // Get the citizen's full name from session
-      createdDate: new Date()  // Automatically set the creation date
-    });
-    await announcement.save();
+    const { title, description } = req.body;
+    const author = req.session.fname; // Get the logged-in user (author) from session
 
-    // Emit a socket event to display the announcement in real-time (optional)
-    socketIO.emit('newAnnouncement', announcement);
+    // Save the new announcement
+    const newAnnouncement = new Announcement({
+      title,
+      description,
+      author,
+    });
+
+    const savedAnnouncement = await newAnnouncement.save();
+
+    // Emit the new announcement to all clients
+    socketIO.emit('newAnnouncement', {
+      title: savedAnnouncement.title,
+      description: savedAnnouncement.description,
+      author: savedAnnouncement.author,
+      createdDate: savedAnnouncement.createdDate,
+    });
 
     res.sendStatus(200);
   } catch (error) {
@@ -411,11 +464,13 @@ app.post('/saveAnnouncement', async (req, res) => {
   }
 });
 
-// Retrieving the announcements
+
+
+// Retrieving and displaying announcements
 app.get('/announcements', async (req, res) => {
   try {
     // Get the logged-in user's fullname from the session
-    const fullname = req.session.fname;  // Assuming the fullname is stored in the session
+    const fullname = req.session.fname;  // Assume fullname is stored in the session
 
     // Fetch the announcements and sort them by the most recent
     const announcements = await Announcement.find().sort({ createdDate: -1 });
@@ -427,8 +482,6 @@ app.get('/announcements', async (req, res) => {
     res.sendStatus(500);
   }
 });
-
-
 
 
 
@@ -452,20 +505,6 @@ app.get("/home", (request, response) => {
 });
 
 
-
-// loading the announcements page
-app.get("/announcements", (request, response) => {
-  session = request.session;
-  // uname = request.session.fullname;
-  if (session.uid && session.fname) {
-    response.render("announcements", {
-      data: {
-        userid: session.uid,
-        fullname: session.fname,
-      },
-    });
-  } else response.redirect("/");
-});
 
 
 // loading the searchinfo page
@@ -498,6 +537,21 @@ app.get("/sharestatus", (request, response) => {
 
 
 
+
+// loading the announcements page
+app.get("/announcements", (request, response) => {
+  session = request.session;
+  // uname = request.session.fullname;
+  if (session.uid && session.fname) {
+    response.render("announcements", {
+      data: {
+        userid: session.uid,
+        fullname: session.fname,
+      },
+    });
+  } else response.redirect("/");
+});
+
 //loading the chatroom
 app.get("/chatroom", (request, response) => {
   session = request.session;
@@ -519,39 +573,6 @@ app.get("/logout", (request, response) => {
   response.redirect("/");
 });
 
-
-
-app.post("/saveMessage", async (request, response) => {
-  try {
-    // Create a new message from the request body with default delivery status (false)
-    var message = new Message({
-      sender: request.body.sender,
-      message: request.body.message,
-      sentTime: request.body.sentTime,
-      delivered: false,  // Set delivered status to false initially
-    });
-
-    // Save the message to the database
-    await message.save();
-
-    // Emit the message to the client for real-time display
-    socketIO.emit("message", message);
-
-    // Simulate message delivery after 5 seconds
-    setTimeout(async () => {
-      // Update the message's delivered status in the database
-      await Message.findByIdAndUpdate(message._id, { delivered: true });
-
-      // Emit the 'messageDelivered' event to the front end to update ticks
-      socketIO.emit("messageDelivered", message._id);
-    }, 5000);  // Simulate a 5-second delivery delay
-
-    response.sendStatus(200);
-  } catch (error) {
-    console.error("Error saving message:", error);
-    response.sendStatus(500);
-  }
-});
 
 
 

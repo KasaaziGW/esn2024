@@ -7,46 +7,102 @@
 <body>
     <%- include('templates/header'); %>
     <main class="d-flex flex-nowrap" style="height:600px;">
-        <%- include('templates/nav'); %>
-        
-
-        <section class="announcement-section">
+        <%- include('templates/nav'); %>  
+        <section class="announcement-section" method="POST" action="/saveAnnouncement">
             <!-- Announcement Input Form -->
             <div class="announcement-form-container">
                 <h2>Make an Announcement</h2>
-                <form id="announcement-form">
+                <form id="announcement-form" method="POST" action="/saveAnnouncement">
                   <label for="announcement-title">Announcement Title</label>
                   <input type="text" id="announcement-title" name="title" placeholder="Enter announcement title" required>
-                    <label for="announcement-title">Author</label>
-                    <input type="text" id="announcement-title" name="title" value="<%= data.fullname %>">
-
-                    <label for="announcement-description">Description</label>
-                    <textarea id="announcement-description" name="description" placeholder="Enter announcement description" rows="4" required></textarea>
-
-                    <button type="submit" class="announcement-submit-btn">Submit</button>
+                
+                  <label for="announcement-author">Author</label>
+                  <input type="text" id="announcement-author" name="author" value="<%= data.fullname %>" placeholder="Enter your name" disabled>
+                
+                  <label for="announcement-description">Description</label>
+                  <textarea id="announcement-description" name="description" placeholder="Enter announcement description" rows="4" required></textarea>
+                
+                  <button type="submit" class="announcement-submit-btn">Submit</button>
                 </form>
+                
             </div>
 
             <!-- Announcement List -->
             <div class="announcement-list-container">
-                <h2>Previous Announcements</h2>
-                <ul id="announcement-list">
-                    <li class="announcement-item">
-                        <h3 class="announcement-item-title">Welcome to our new platform!</h3>
-                        <p class="announcement-item-description">We are excited to announce the launch of our brand new platform. Stay tuned for updates!</p>
-                        <span class="announcement-item-date">Posted on: October 20, 2024</span>
-                    </li>
-                    <li class="announcement-item">
-                        <h3 class="announcement-item-title">Maintenance Notice</h3>
-                        <p class="announcement-item-description">Our platform will undergo maintenance on October 22, 2024. Please expect downtime between 2 AM and 4 AM.</p>
-                        <span class="announcement-item-date">Posted on: October 18, 2024</span>
-                    </li>
-                </ul>
+              <h2>Previous Announcements</h2>
+              <ul id="announcement-list">
+                <% announcements.forEach(function(announcement) { %>
+                  <li class="announcement-item">
+                    <h3 class="announcement-item-title"><%= announcement.title %></h3>
+                    <p class="announcement-item-description"><%= announcement.description %></p>
+                    <span class="announcement-item-author">By: <%= announcement.author %></span>
+                    <span class="announcement-item-date">
+                      Posted on: <%= new Date(announcement.createdDate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) %>
+                    </span>
+                  </li>
+                <% }); %>
+              </ul>              
             </div>
+            
         </section>              
     </main>
     <%- include('templates/footer'); %>
     <script src="js/chat.js"></script>
-
+    <script>
+      // Connect to the socket
+      const socket = io();
+    
+      // Handle form submission with AJAX
+      document.querySelector('#announcement-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+    
+        const title = document.querySelector('#announcement-title').value;
+        const description = document.querySelector('#announcement-description').value;
+    
+        // Send form data via fetch to save announcement
+        fetch('/saveAnnouncement', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ title, description }),
+        })
+        .then(response => {
+          if (response.ok) {
+            document.querySelector('#announcement-title').value = '';
+            document.querySelector('#announcement-description').value = '';
+          } else {
+            console.error('Failed to submit announcement');
+          }
+        })
+        .catch(error => console.error('Error:', error));
+      });
+    
+      // Listen for 'newAnnouncement' event from the server
+      socket.on('newAnnouncement', function(announcement) {
+        const announcementList = document.querySelector('#announcement-list');
+    
+        // Create a new list item for the new announcement
+        const listItem = document.createElement('li');
+        listItem.classList.add('announcement-item');
+        listItem.innerHTML = `
+          <h3 class="announcement-item-title">${announcement.title}</h3>
+          <p class="announcement-item-description">${announcement.description}</p>
+          <span class="announcement-item-author">By: ${announcement.author}</span>
+          <span class="announcement-item-date">Posted on: ${new Date(announcement.createdDate).toDateString()}</span>
+          <span class="announcement-item-date">Posted on: ${new Date(announcement.createdDate).toDateString()}</span>
+        `;
+    
+        // Prepend the new announcement (add to the top)
+        announcementList.prepend(listItem);
+    
+        // Ensure only 2 announcements are visible
+        if (announcementList.children.length > 2) {
+          announcementList.removeChild(announcementList.lastChild);  // Remove the oldest announcement
+        }
+      });
+    </script> 
+    
+    
 </body>
 </html> 
