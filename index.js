@@ -435,28 +435,47 @@ app.post("/saveMessage", async (request, response) => {
 
 
 // Save new announcement (POST request)// POST route to save an announcement
-app.post('/saveAnnouncement', async (req, res) => {
-  try {
-    const { title, description } = req.body;
-    const author = req.session.fname;  // Get the logged-in user's fullname from session
-    
-    // Create a new announcement
-    const newAnnouncement = new Announcement({
-      title,
-      description,
-      author
-    });
-    
-    // Save the announcement
-    await newAnnouncement.save();
+// Route to handle the submission of a new announcement
+app.post('/saveAnnouncement', (req, res) => {
+  
+  // Log the session data to inspect if 'fname' (author) is correctly stored in the session
+  console.log('Session data:', req.session);
 
-    // Redirect to the announcements page with a success message
-    res.redirect('/announcements?success=Your announcement was successfully posted!');
-  } catch (error) {
-    console.error('Error saving announcement:', error);
-    res.sendStatus(500);  // Handle the error appropriately
+  // Destructure 'title' and 'description' from the request body
+  const { title, description } = req.body;
+  
+  // Get the author's name from the session using 'fname' (assumed to be set during login)
+  const author = req.session.fname; 
+  
+  // If the author is not found in the session (i.e., session expired or not set), log an error and respond with a 500 status
+  if (!author) {
+    console.error('Author missing from session.');
+    return res.status(500).send('Internal Server Error: Author missing from session.');
   }
+
+  // Create a new Announcement object using the Mongoose model
+  // Set the title and description from the request, the author from the session, and generate the current date for 'createdDate'
+  const newAnnouncement = new Announcement({
+    title,             // Announcement title from request body
+    description,       // Announcement description from request body
+    author,            // Author name fetched from the session
+    createdDate: new Date(),  // Use the current date and time for 'createdDate'
+  });
+
+  // Save the newly created announcement to the database using Mongoose's save() method
+  newAnnouncement.save()
+    .then(() => {
+      // If save is successful, redirect the user back to the '/announcements' page
+      res.redirect('/announcements');
+    })
+    .catch(err => {
+      // If there's an error during save (e.g., validation issues), log the error and send a 500 Internal Server Error response
+      console.error('Error saving announcement:', err);
+      res.status(500).send('Internal Server Error');
+    });
 });
+
+
 
 
 
@@ -480,6 +499,30 @@ app.get('/announcements', async (req, res) => {
 
 
 
+// Search route for announcements by title or description
+app.get('/search-announcements', async (req, res) => {
+  try {
+    const searchQuery = req.query.query;  // Get the search query from the form input
+    const fullname = req.session.fname;   // Get the fullname from the session
+
+    // Use a regular expression to make the search case-insensitive
+    const regex = new RegExp(searchQuery, 'i');
+
+    // Search for posts where the title or description matches the query
+    const announcements = await Announcement.find({
+      $or: [
+        { title: regex },
+        { description: regex }
+      ]
+    }).sort({ createdDate: -1 });  // Sort by latest posts
+
+    // Render the announcements view with the search results
+    res.render('announcements', { announcements, data: { fullname }, success: `Search results for "${searchQuery}"` });
+  } catch (error) {
+    console.error('Error searching announcements:', error);
+    res.sendStatus(500);
+  }
+});
 
 
 

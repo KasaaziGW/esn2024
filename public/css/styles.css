@@ -120,7 +120,7 @@ body {
     list-style: none;
     padding: 0;
     margin: 0;
-    max-height: 400px;
+    max-height: 300px;
     overflow-y: auto;
 }
 
@@ -448,7 +448,7 @@ input[type=password]:placeholder {
 }
 
 /* Search input styling */
-#search-criteria {
+#search-criteria, #search-annou {
     padding: 10px;
     width: 70%; /* Adjust width to make space for button */
     border-radius: 4px 0 0 4px; /* Rounded left side only */
@@ -459,6 +459,9 @@ input[type=password]:placeholder {
 
 /* Search button styling */
 .search-button {
+    width: 30%;
+}
+.search-button-annou, .search-button {
     padding: 10px 20px;
     background-color: #d4d0e5;
     border: 1px solid #d4d0e5;
@@ -466,11 +469,14 @@ input[type=password]:placeholder {
     font-size: 16px;
     border-radius: 0 4px 4px 0;
     cursor: pointer;
-    width: 30%;
     font-weight: bold;
 }
+.search-button-annou{
 
-.search-button:hover {
+    width: 20%;
+}
+
+.search-button:hover, .search-button-annou:hover {
     background-color: #7a6dae;
     color: #fff;
 }
