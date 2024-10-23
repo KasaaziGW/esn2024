@@ -502,8 +502,8 @@ app.get('/announcements', async (req, res) => {
 // Search route for announcements by title or description
 app.get('/search-announcements', async (req, res) => {
   try {
-    const searchQuery = req.query.query;  // Get the search query from the form input
-    const fullname = req.session.fname;   // Get the fullname from the session
+    const searchQuery = req.query.query || '';  // Get the search query from the form input or set it to an empty string if not provided
+    const fullname = req.session.fname;         // Get the fullname from the session
 
     // Use a regular expression to make the search case-insensitive
     const regex = new RegExp(searchQuery, 'i');
@@ -517,12 +517,18 @@ app.get('/search-announcements', async (req, res) => {
     }).sort({ createdDate: -1 });  // Sort by latest posts
 
     // Render the announcements view with the search results
-    res.render('announcements', { announcements, data: { fullname }, success: `Search results for "${searchQuery}"` });
+    res.render('announcements', {
+      announcements,
+      query: searchQuery,  // Pass search query to the view
+      data: { fullname },
+      success: `Search results for "${searchQuery}"`
+    });
   } catch (error) {
     console.error('Error searching announcements:', error);
     res.sendStatus(500);
   }
 });
+
 
 
 
