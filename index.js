@@ -581,34 +581,43 @@ app.put('/edit-message/:id', async (req, res) => {
 // Forward Message Route:This route will handle the POST request to forward a message to another user.
 // In this case, we assume the system forwards the message by creating a new message for the recipient.
 // Route to forward a message
-app.post('/forward-message/:id', async (req, res) => {
+// POST route to handle forwarding messages
+app.post('/forward-message/:messageId', async (req, res) => {
   try {
-    const messageId = req.params.id;
-    const forwardTo = req.body.forwardTo;  // Username to forward the message to
+    const { forwardTo } = req.body;
+    const messageId = req.params.messageId;
 
-    // Find the message by ID to retrieve its content
-    const messageToForward = await Message.findById(messageId);
+    // Find the original message
+    const originalMessage = await Message.findById(messageId);
 
-    if (messageToForward) {
-      // Create a new message for the recipient with the same content
-      const forwardedMessage = new Message({
-        sender: forwardTo,  // The recipient will be the new sender
-        message: messageToForward.message,  // Same message content
-        sentTime: new Date().toISOString()  // New timestamp for the forward
-      });
-
-      // Save the forwarded message to the database
-      await forwardedMessage.save();
-
-      res.json({ success: true, message: 'Message forwarded successfully' });
-    } else {
-      res.json({ success: false, message: 'Message not found' });
+    if (!originalMessage) {
+      return res.status(404).json({ success: false, message: 'Message not found' });
     }
+
+    // Increment the forward count on the original message
+    originalMessage.forwardCount = (originalMessage.forwardCount || 0) + 1;
+    await originalMessage.save();
+
+    // Create a new message for the forwarded one
+    const newMessage = new Message({
+      sender: forwardTo,  // Forwarded message will appear from the user who forwarded it
+      message: originalMessage.message,
+      sentTime: new Date().toLocaleTimeString(),
+      forwardCount: originalMessage.forwardCount,  // Carry over the forward count
+      delivered: false  // Default to not delivered for the new forwarded message
+    });
+
+    await newMessage.save();
+
+    return res.json({ success: true, newMessage });
   } catch (error) {
-    console.error('Error forwarding message:', error);
-    res.sendStatus(500);
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Failed to forward message' });
   }
 });
+
+
+
 
 
 

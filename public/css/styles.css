@@ -571,7 +571,7 @@ p {
 #results-list {
     list-style-type: none;
     padding: 1rem;
-    max-height: 270px; /* Set the max height you desire */
+    max-height: 450px; /* Set the max height you desire */
     overflow-y: auto;  /* Enable vertical scrolling when content exceeds the max height */
 }
 

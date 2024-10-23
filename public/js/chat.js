@@ -271,45 +271,57 @@ socket.on("messageDelivered", function (messageId) {
 });
 
 /// Function to display a message in the chat window
+// Function to display a message in the chat window
 function displayMessage(message) {
   var fullname = document.querySelector("#fullname").textContent;
 
   // Check if the message sender is the current user
   if (message.sender === fullname) {
-      // Initially show a single tick (message sent but not delivered yet)
-      let tickMarks = "✔";  // Single tick initially (for sent status)
-      let tickColor = "black";  // Default color for the sent message
+    // Initially show a single tick (message sent but not delivered yet)
+    let tickMarks = "✔";  // Single tick initially (for sent status)
+    let tickColor = "black";  // Default color for the sent message
 
-      $("#messages").append(`<div id="messageContainer1" data-message-id="${message._id}">
-                                <div id="messageHeader">
-                                    <div id="senderName">Me</div>
-                                    <div id="sentTime">${message.sentTime}</div>
-                                </div>
-                                <p>${message.message}</p>
-                                
-                                <!-- Message Options for Edit, Delete, Forward -->
-                                <div class="message-options">
-                                    <button class="btn-edit-message" data-id="${message._id}">Edit</button>
-                                    <button class="btn-delete-message" data-id="${message._id}">Delete</button>
-                                    <button class="btn-forward-message" data-id="${message._id}">Forward</button>
-                                </div>
+    // Add 'Forwarded' label if the message has been forwarded
+    let forwardedText = message.forwardCount > 0 ? `Forwarded (${message.forwardCount} times)` : "";
 
-                                <div id="deliveredStatus" class="delivered-tick" style="color: ${tickColor};">${tickMarks}</div>
-                            </div>`);
+    $("#messages").append(`
+      <div id="messageContainer1" data-message-id="${message._id}">
+        <div id="messageHeader">
+          <div id="senderName">Me</div>
+          <div id="sentTime">${message.sentTime}</div>
+        </div>
+        <p>${message.message}</p>
+        <p class="forwarded-label">${forwardedText}</p> <!-- Forwarded label here -->
+        
+        <!-- Message Options for Edit, Delete, Forward -->
+        <div class="message-options">
+          <button class="btn-edit-message" data-id="${message._id}">Edit</button>
+          <button class="btn-delete-message" data-id="${message._id}">Delete</button>
+          <button class="btn-forward-message" data-id="${message._id}">Forward</button>
+        </div>
+
+        <div id="deliveredStatus" class="delivered-tick" style="color: ${tickColor};">${tickMarks}</div>
+      </div>
+    `);
   } else {
-      // Append other people's messages (no tick marks)
-      $("#messages").append(`<div id="messageContainer" data-message-id="${message._id}">
-                                <div id="messageHeader">
-                                    <div id="senderName">${message.sender}</div>
-                                    <div id="sentTime">${message.sentTime}</div>
-                                </div>
-                                <p>${message.message}</p>
+    // Append other people's messages (no tick marks)
+    let forwardedText = message.forwardCount > 0 ? `Forwarded (${message.forwardCount} times)` : "";
 
-                                <!-- Message Options for Forward (for other users' messages) -->
-                                <div class="message-options">
-                                    <button class="btn-forward-message" data-id="${message._id}">Forward</button>
-                                </div>
-                            </div>`);
+    $("#messages").append(`
+      <div id="messageContainer" data-message-id="${message._id}">
+        <div id="messageHeader">
+          <div id="senderName">${message.sender}</div>
+          <div id="sentTime">${message.sentTime}</div>
+        </div>
+        <p>${message.message}</p>
+        <p class="forwarded-label">${forwardedText}</p> <!-- Forwarded label here -->
+
+        <!-- Message Options for Forward (for other users' messages) -->
+        <div class="message-options">
+          <button class="btn-forward-message" data-id="${message._id}">Forward</button>
+        </div>
+      </div>
+    `);
   }
 
   // Call the function to scroll the container to the latest message
@@ -317,10 +329,13 @@ function displayMessage(message) {
 }
 
 
-// Event Listeners for Edit, Delete, Forward attaching event listeners to handle the actions for Edit, Delete, and Forward as we 
+
+
+// Event Listeners for Edit, Delete, Forward actions
 document.addEventListener('DOMContentLoaded', function () {
   // Event delegation for dynamically created buttons
   document.querySelector("#messages").addEventListener("click", function (event) {
+
     // Handle Edit Message
     if (event.target.classList.contains('btn-edit-message')) {
       const messageId = event.target.dataset.id;
@@ -334,14 +349,14 @@ document.addEventListener('DOMContentLoaded', function () {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ newMessage: newText })
         })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              messageElement.textContent = newText;
-            } else {
-              console.error('Failed to edit message');
-            }
-          });
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            messageElement.textContent = newText;
+          } else {
+            console.error('Failed to edit message');
+          }
+        });
       }
     }
 
@@ -349,14 +364,14 @@ document.addEventListener('DOMContentLoaded', function () {
     if (event.target.classList.contains('btn-delete-message')) {
       const messageId = event.target.dataset.id;
       fetch(`/delete-message/${messageId}`, { method: 'DELETE' })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            document.querySelector(`[data-message-id="${messageId}"]`).remove();
-          } else {
-            console.error('Failed to delete message');
-          }
-        });
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          document.querySelector(`[data-message-id="${messageId}"]`).remove();
+        } else {
+          console.error('Failed to delete message');
+        }
+      });
     }
 
     // Handle Forward Message
@@ -365,23 +380,29 @@ document.addEventListener('DOMContentLoaded', function () {
       const forwardTo = prompt("Enter the username to forward this message:");
 
       if (forwardTo) {
+        // Fetch the message content to be forwarded
+        const messageElement = document.querySelector(`[data-message-id="${messageId}"] p`);
+        const messageContent = messageElement.textContent;
+
+        // Send the forward request with recipient and message content
         fetch(`/forward-message/${messageId}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ forwardTo })
+          body: JSON.stringify({ forwardTo, message: messageContent })
         })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              alert('Message forwarded successfully');
-            } else {
-              console.error('Failed to forward message');
-            }
-          });
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Message forwarded successfully');
+          } else {
+            console.error('Failed to forward message');
+          }
+        });
       }
     }
   });
 });
+
 
 
 // Automatically scroll to the latest message
