@@ -258,8 +258,8 @@ document.getElementById('userProfileForm').addEventListener('submit', function (
   const updatedUser = {
     username: user.username,
     password: user.password,
-    email: document.getElementById('email').value,
-    role: document.getElementById('role').value
+    email: document.getElementById('email').value = user.email,
+    role: document.getElementById('role').value = user.role,
   };
   //validating fields by rules
 
