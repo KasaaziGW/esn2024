@@ -243,7 +243,6 @@ const user = {
   email: 'mseddie5@gmail.com',
   priviledge: 'Administrator'
 };
-
 // Populate the form with existing user data
 document.getElementById('username').value = user.username;
 document.getElementById('password').value = user.password;
