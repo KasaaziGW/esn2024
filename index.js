@@ -234,9 +234,8 @@ if (!isAdminLoggedIn) {
 
   // Redirect to login page or home page
   
-  window.location.href = '/login';
+  window.location.href = '/processLogin';
 }
-
 // Fetch user data 
 const user = {
   username: 'ESNAdmin',
@@ -309,7 +308,7 @@ const userPrivilege = 'coordinator';
 
 if (userPrivilege !== 'coordinator') {
   alert("Access denied. Only Coordinators can post announcements.");
-  window.location.href = '/login';
+  window.location.href = '/processLogin';
 
   // Redirect to login if not a Coordinator
 }
