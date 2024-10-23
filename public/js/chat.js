@@ -270,7 +270,7 @@ socket.on("messageDelivered", function (messageId) {
   }
 });
 
-// Function to display a message in the chat window
+/// Function to display a message in the chat window
 function displayMessage(message) {
   var fullname = document.querySelector("#fullname").textContent;
 
@@ -286,22 +286,103 @@ function displayMessage(message) {
                                     <div id="sentTime">${message.sentTime}</div>
                                 </div>
                                 <p>${message.message}</p>
+                                
+                                <!-- Message Options for Edit, Delete, Forward -->
+                                <div class="message-options">
+                                    <button class="btn-edit-message" data-id="${message._id}">Edit</button>
+                                    <button class="btn-delete-message" data-id="${message._id}">Delete</button>
+                                    <button class="btn-forward-message" data-id="${message._id}">Forward</button>
+                                </div>
+
                                 <div id="deliveredStatus" class="delivered-tick" style="color: ${tickColor};">${tickMarks}</div>
                             </div>`);
   } else {
       // Append other people's messages (no tick marks)
-      $("#messages").append(`<div id="messageContainer">
+      $("#messages").append(`<div id="messageContainer" data-message-id="${message._id}">
                                 <div id="messageHeader">
                                     <div id="senderName">${message.sender}</div>
                                     <div id="sentTime">${message.sentTime}</div>
                                 </div>
                                 <p>${message.message}</p>
+
+                                <!-- Message Options for Forward (for other users' messages) -->
+                                <div class="message-options">
+                                    <button class="btn-forward-message" data-id="${message._id}">Forward</button>
+                                </div>
                             </div>`);
   }
 
   // Call the function to scroll the container to the latest message
   scrollContainer();
 }
+
+
+// Event Listeners for Edit, Delete, Forward attaching event listeners to handle the actions for Edit, Delete, and Forward as we 
+document.addEventListener('DOMContentLoaded', function () {
+  // Event delegation for dynamically created buttons
+  document.querySelector("#messages").addEventListener("click", function (event) {
+    // Handle Edit Message
+    if (event.target.classList.contains('btn-edit-message')) {
+      const messageId = event.target.dataset.id;
+      const messageElement = document.querySelector(`[data-message-id="${messageId}"] p`);
+      const currentText = messageElement.textContent;
+      const newText = prompt("Edit your message:", currentText);
+
+      if (newText) {
+        fetch(`/edit-message/${messageId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ newMessage: newText })
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              messageElement.textContent = newText;
+            } else {
+              console.error('Failed to edit message');
+            }
+          });
+      }
+    }
+
+    // Handle Delete Message
+    if (event.target.classList.contains('btn-delete-message')) {
+      const messageId = event.target.dataset.id;
+      fetch(`/delete-message/${messageId}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.querySelector(`[data-message-id="${messageId}"]`).remove();
+          } else {
+            console.error('Failed to delete message');
+          }
+        });
+    }
+
+    // Handle Forward Message
+    if (event.target.classList.contains('btn-forward-message')) {
+      const messageId = event.target.dataset.id;
+      const forwardTo = prompt("Enter the username to forward this message:");
+
+      if (forwardTo) {
+        fetch(`/forward-message/${messageId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ forwardTo })
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              alert('Message forwarded successfully');
+            } else {
+              console.error('Failed to forward message');
+            }
+          });
+      }
+    }
+  });
+});
+
 
 // Automatically scroll to the latest message
 function scrollContainer() {

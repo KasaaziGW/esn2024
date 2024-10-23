@@ -529,6 +529,88 @@ app.get('/search-announcements', async (req, res) => {
   }
 });
 
+// create the necessary routes to handle each action: delete, edit, and forward
+// Delete Message Route
+// This route will handle the PUT request to edit a message.
+// Route to delete a message
+app.delete('/delete-message/:id', async (req, res) => {
+  try {
+    const messageId = req.params.id;
+
+    // Find the message by ID and delete it
+    const deletedMessage = await Message.findByIdAndDelete(messageId);
+
+    if (deletedMessage) {
+      res.json({ success: true, message: 'Message deleted successfully' });
+    } else {
+      res.json({ success: false, message: 'Message not found' });
+    }
+  } catch (error) {
+    console.error('Error deleting message:', error);
+    res.sendStatus(500);
+  }
+});
+
+
+// Route to edit a message
+// This route will handle the PUT request to edit a message.
+app.put('/edit-message/:id', async (req, res) => {
+  try {
+    const messageId = req.params.id;  // Get the message ID from the URL
+    const newMessage = req.body.newMessage;  // Get the new message content from the request body
+
+    // Find the message by ID and update it with the new message content
+    const updatedMessage = await Message.findByIdAndUpdate(
+      messageId,
+      { message: newMessage },
+      { new: true }
+    );
+
+    if (updatedMessage) {
+      res.json({ success: true, message: 'Message updated successfully' });
+    } else {
+      res.json({ success: false, message: 'Message not found' });
+    }
+  } catch (error) {
+    console.error('Error editing message:', error);
+    res.sendStatus(500);
+  }
+});
+
+
+// Forward Message Route:This route will handle the POST request to forward a message to another user.
+// In this case, we assume the system forwards the message by creating a new message for the recipient.
+// Route to forward a message
+app.post('/forward-message/:id', async (req, res) => {
+  try {
+    const messageId = req.params.id;
+    const forwardTo = req.body.forwardTo;  // Username to forward the message to
+
+    // Find the message by ID to retrieve its content
+    const messageToForward = await Message.findById(messageId);
+
+    if (messageToForward) {
+      // Create a new message for the recipient with the same content
+      const forwardedMessage = new Message({
+        sender: forwardTo,  // The recipient will be the new sender
+        message: messageToForward.message,  // Same message content
+        sentTime: new Date().toISOString()  // New timestamp for the forward
+      });
+
+      // Save the forwarded message to the database
+      await forwardedMessage.save();
+
+      res.json({ success: true, message: 'Message forwarded successfully' });
+    } else {
+      res.json({ success: false, message: 'Message not found' });
+    }
+  } catch (error) {
+    console.error('Error forwarding message:', error);
+    res.sendStatus(500);
+  }
+});
+
+
 
 
 

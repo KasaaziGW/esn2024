@@ -6,7 +6,7 @@
 </head>
 <body>
     <%- include('templates/header'); %>
-    <main class="d-flex flex-nowrap" style="height:600px;">
+    <main class="d-flex flex-nowrap" style="height:800px;">
         <%- include('templates/nav'); %>
 
         <!-- Success message display -->
@@ -28,7 +28,7 @@
               <input type="text" id="announcement-author" name="author" value="<%= data.fullname %>" placeholder="Enter your name" disabled>
         
               <label for="announcement-description">Description</label>
-              <textarea id="announcement-description" name="description" placeholder="Enter announcement description" rows="4" required></textarea>
+              <textarea id="announcement-description" name="description" placeholder="Enter announcement description" rows="10" required></textarea>
         
               <button type="submit" class="announcement-submit-btn">Submit</button>
             </form>
