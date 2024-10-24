@@ -224,7 +224,7 @@ httpServer.listen(PORT, () => {
 });
 // Check if an administrator is logged in
 
-/*const isAdminLoggedIn = true; 
+/*--const isAdminLoggedIn = true; 
 
 // Placeholder, to be validated through server authentication
 
@@ -366,6 +366,6 @@ function postAnnouncement(text) {
     announcements.push(newAnnouncement);
     resolve({ success: true });
   });
-}
+} --*/
 
  
