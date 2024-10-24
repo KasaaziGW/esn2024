@@ -2,10 +2,13 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const flashMessages = require("connect-flash");
 const sessions = require("express-session");
-const mongoose = require("mongoose");
+const mongoose = require("mongoose"); 
 const { Citizen } = require("./models/Citizen");
 const { Message } = require("./models/Message");
+const stopWords = new Set(['the', 'is', 'at', 'which', 'on', 'and']); // Define your stop words
+const {announcements} = require("./models/PublicAnnouncements");     // Import your model here
 const bcrypt = require("bcryptjs");
+const { title } = require("process");
 const PORT = 3300; // the port where our server will be running
 
 // instantiating express
@@ -21,6 +24,7 @@ app.use(
     cookie: { maxAge: 60000 },
     resave: false,
     saveUninitialized: false,
+    cookie:{secure:false}
   })
 );
 app.use(flashMessages());
@@ -121,6 +125,9 @@ app.post("/processLogin", (request, response) => {
   // getting the data from the user
   let email = request.body.email;
   let pswd = request.body.password;
+  // Debugging output
+  console.log("Received email:", email);
+  console.log("Received password:", pswd);
   if (email === "") {
     request.flash("error", "The email field must be filled! Please try again.");
     response.redirect("/");
@@ -132,6 +139,7 @@ app.post("/processLogin", (request, response) => {
     );
     response.redirect("/");
   }
+
   // check if the user exists
   Citizen.findOne({ username: email })
     .then((userInfo) => {
@@ -214,9 +222,13 @@ socketIO.on('connection', (socket)=>{
 });
 
 
-/*
+
 // Backend Code (Single Route for Search and Autocomplete):
 // Search Route and autcomplete route
+
+
+
+
 // handle the autocomplete logic directly within the existing search route. This way, the same route can 
 // provide both search results and suggestions based on the input length or some other criteria.
 app.post('/search', async (request, response) => {
@@ -292,18 +304,18 @@ app.post('/search', async (request, response) => {
       // No matching records found
       response.json({ success: false, message: 'No matching records found' });
   }
-});*/
+});
 
 // Backend Code (Single Route for Search and Autocomplete):
 // Search Route and autcomplete route
 // handle the autocomplete logic directly within the existing search route. This way, the same route can 
 // provide both search results and suggestions based on the input length or some other criteria.
-app.post('/search', async (req, res) => {
+app.post('/search', async (request, response) => {
   const searchCriteria = req.body.searchCriteria;
 
   // Check if searchCriteria is provided
   if (!searchCriteria) {
-      return res.json({ success: false, message: 'No search criteria provided' });
+      return response.json({ success: false, message: 'No search criteria provided' });
   }
 
   // Search for a citizen by either fullname or username
@@ -378,7 +390,7 @@ app.post('/status', async (request, response) => {
               citizen: updatedCitizen  // Sending the updated citizen object in the response
           });
       } else {
-          // If no citizen was found with the provided email
+          // If no citizen was found with the provided username
           response.status(404).json({ success: false, message: 'Citizen not found' });
       }
   } catch (error) {
@@ -407,7 +419,7 @@ app.get("/home", (request, response) => {
 });
 
 // loading the searchinfo page
-app.get("/searchinfo", (request, response) => {
+/*app.get("/searchinfo", (request, response) => {
   session = request.session;
   // uname = request.session.fullname;
   if (session.uid && session.fname) {
@@ -419,6 +431,45 @@ app.get("/searchinfo", (request, response) => {
     });
   } else response.redirect("/");
 });
+*/
+app.get("/searchinfo", async (request, response) => {
+  const session = request.session;
+
+  // Ensure that the session is valid 
+  if (session && session.uid && session.fname) {
+      try {
+          // Fetch announcements and users from your data source
+          const announcements = await fetchPublicAnnouncements();
+          const users = await fetchCitizen();
+
+          // Check if announcements and users are defined
+          console.log("Checking announcements and users...");
+          console.log("Announcements:", announcements);
+          console.log("Users:", users);
+
+          if (!Array.isArray(announcements) || !Array.isArray(users)) {
+              throw new Error("Announcements or users data is missing or not an array.");
+          }
+
+          // Render the searchinfo page with both announcements and users
+          response.render("searchinfo", {
+              data: {
+                  userid: session.uid,
+                  fullname: session.fname || "Guest", // Default to "Guest" if fname is undefined
+              },
+              announcements,
+              users,
+          });
+      } catch (error) {
+          console.error("Error rendering searchinfo:", error);
+          response.status(500).send('Internal Server Error: ' + error.message);
+      }
+  } else {
+      console.log("Redirecting to home, session invalid.");
+      response.redirect("/");
+  }
+});
+
 
 // loading the sharestatus page
 app.get("/sharestatus", (request, response) => {
@@ -435,7 +486,6 @@ app.get("/sharestatus", (request, response) => {
 });
 
 
-
 //loading the chatroom
 app.get("/chatroom", (request, response) => {
   session = request.session;
@@ -450,11 +500,88 @@ app.get("/chatroom", (request, response) => {
   } else response.redirect("/");
 });
 
+
 // logging the user out
 app.get("/logout", (request, response) => {
   request.session.destroy();
   session = "";
   response.redirect("/");
+});
+
+// Endpoint to create a private message
+app.post('/createPrivateMessage', async (request, response) => {
+  const { sender, recipient, content, status } = request.body;
+
+  // Validate input
+  if (!sender || !recipient || !content) {
+    return response.status(400).json({ success: false, message: 'Sender, recipient, and content are required' });
+  }
+
+  try {
+    const newMessage = new Message({
+      sender,
+      recipient,
+      content,
+      status,
+      timestamp: new Date(),
+      isPrivate: true,
+    });
+
+    await newMessage.save(); // Save the message to the database
+
+    return response.json({ success: true, message: 'Private message created successfully' });
+  } catch (error) {
+    console.error(`Error creating private message: ${error}`);
+    return response.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Endpoint to fetch private messages
+app.post('/fetchPrivateMessages', async (request, response) => {
+  const searchCriteria = request.body.searchCriteria;
+
+  if (!searchCriteria) {
+    return response.json({ success: false, message: 'No search criteria provided' });
+  }
+
+  const criteriaWords = searchCriteria.split(' ').map(word => word.toLowerCase());
+  const filteredWords = criteriaWords.filter(word => !stopWords.has(word));
+
+  // Check if filteredWords is empty
+  if (filteredWords.length === 0) {
+    return response.json({ success: false, message: 'Search criteria contains only stop words' });
+  }
+
+  try {
+    const messages = await Message.find({ isPrivate: true })
+      .sort({ timestamp: -1 })
+      .limit(10)
+      .exec();
+
+    // Filter messages based on the search criteria
+    const responseMessages = messages
+      .filter(message => {
+        return filteredWords.some(word => 
+          message.content.toLowerCase().includes(word) || 
+          message.sender.toLowerCase().includes(word)
+        );
+      })
+      .map(message => ({
+        username: message.sender,
+        status: message.status,
+        timestamp: message.timestamp,
+        content: message.content,
+      }));
+
+    if (responseMessages.length === 0) {
+      return response.json({ success: false, message: 'No matching messages found' });
+    }
+
+    return response.json({ success: true, results: responseMessages });
+  } catch (error) {
+    console.error(`Error fetching private messages: ${error}`);
+    return response.status(500).json({ success: false, message: 'Server error' });
+  }
 });
 
 // saving the message to the database
@@ -475,6 +602,60 @@ app.get("/fetchMessages", async (request, response) => {
   });
 });
 
+// Route to load the create announcement page
+app.get("/createAnnouncement", (request, response) => {
+  response.render("createAnnouncement", {
+      messages: {
+          error: request.flash("error"),
+          success: request.flash("success"),
+      },
+  });
+});
+
+// POST request for saving the announcement
+app.post("/saveAnnouncement", async (request, response) => {
+  const { content } = request.body;
+
+  try {
+    const announcement = new Message({
+      content,
+      isPrivate: false,
+      isAnnouncement: true,
+      timestamp: new Date(),
+    });
+
+    await announcement.save();
+    request.flash("success", "Announcement created successfully!");
+    response.redirect("/publicAnnouncements");
+  } catch (err) {
+    console.error("Error saving announcement:", err);
+    request.flash("error", `Error creating announcement: ${err.message}`);
+    response.redirect("/createAnnouncement");
+  }
+});
+
+// Fetching the latest public announcement messages 
+app.get("/publicAnnouncements", async (request, response) => {
+  try {
+    const announcements = await Message.find({ isPrivate: false, isAnnouncement: true })
+      .sort({ timestamp: -1 })
+      .limit(10);
+//Render the page with fetched announcement
+    response.render("publicAnnouncements", {
+      announcements,
+      messages: {
+        error: request.flash("error"),
+        success: request.flash("success"),
+      },
+    });
+  } catch (error) {
+// Log the error for debugging
+    console.error(`Error fetching public announcements: ${error}`);
+// Flash an error message to be displayed to users
+    request.flash("error", "Error fetching announcements.");
+    response.redirect("/home");
+  }
+});
 // receiving and emit a message when a user joins the chat
 socketIO.on("connection", (socket) => {
   socketIO.emit("joined", uname);

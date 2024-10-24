@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('templates/head'); %>
+    <title>Search Information</title>
+</head>
+<body>
+    <%- include('templates/header'); %>
+    <main class="d-flex flex-nowrap" style="height:500px;">
+        <%- include('templates/nav'); %>
+        <div class="search-container">
+            <h2>Search Information</h2>
+            <form id="search-form" action="/searchinfo" method="get">
+                <label for="search-criteria"><%= data.fullname %>&nbsp;&nbsp;Enter Your Search Criteria Here (Username, Fullname, or Announcement Content):</label>
+                <div class="input-button-container">
+                    <input type="text" id="search-criteria" name="query" placeholder="Enter username, fullname, or announcement content" required>
+                    <button type="submit" class="search-button">Search</button>
+                </div>
+            </form>        
+            <div id="suggestion-box"></div>
+
+            <!-- Area for displaying announcement search results -->
+            <div id="search-results" class="results-container">
+                <h3>Announcement Results:</h3>
+                <div id="results-list" class="card">
+                    <% if (announcements && announcements.length > 0) { %>
+                        <% announcements.forEach(announcement => { %>
+                            <div class="announcement-item">
+                                <strong>Sender:</strong> <%= announcement.sender %><br>
+                                <strong>Message:</strong> <%= announcement.content %><br>
+                                <strong>Date:</strong> <%= announcement.date %><br>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p>No announcements found.</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Area for displaying user search results -->
+            <div id="user-results" class="results-container">
+                <h3>Citizen Results:</h3>
+                <div id="citizen-results-list" class="card">
+                    <% if (citizens && citizens.length > 0) { %>
+                        <% citizens.forEach(citizen => { %>
+                            <div class="citizen-item">
+                                <strong>Username:</strong> <%= citizen.username %><br>
+                                <strong>Fullname:</strong> <%= citizen.fullname %><br>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p>No citizens found.</p>
+                    <% } %>
+                </div>
+                  
+            </div>
+        </div>               
+    </main>
+    <%- include('templates/footer'); %>
+    <script src="js/chat.js"></script>
+</body>
+</html>
+

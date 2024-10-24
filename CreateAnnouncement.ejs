@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('templates/head'); %>
+    <title>Create Announcement</title>
+    <script>
+        function validateContent() {
+            const content = document.getElementById('content').value;
+            const wordCount = content.trim().split(/\s+/).length;
+
+            if (wordCount > 200) {
+                alert('Announcement content must not exceed 200 words.');
+                return false;
+            }
+            return true;
+        }
+    </script>
+</head>
+<body>
+    <%- include('templates/header'); %>
+    <main class="container mt-4">
+        <h2>Create Announcement</h2>
+
+        <form action="/saveAnnouncement" method="POST" onsubmit="return validateContent()">
+            <div class="form-group">
+                <label for="sender">Sender:</label>
+                <input type="text" id="sender" name="sender" required class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="subject">Subject:</label>
+                <input type="text" id="subject" name="subject" required class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="content">Announcement Content:</label>
+                <textarea id="content" name="content" required class="form-control" rows="4" maxlength="1000"></textarea>
+                <small class="form-text text-muted">Maximum 200 words.</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-2">Submit Announcement</button>
+        </form>
+
+        <div>
+            <a href="/home" class="btn btn-secondary mt-3">Back to Home</a>
+        </div>
+    </main>
+    <%- include('templates/footer'); %>
+</body>
+</html>

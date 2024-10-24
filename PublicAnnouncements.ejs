@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('templates/head'); %>
+    <title>Public Announcements</title>
+</head>
+<body>
+    <%- include('templates/header'); %>
+    <main class="container mt-4">
+        <h2>Public Announcements</h2>
+
+        <!-- Flash Messages Section -->
+        <% if (messages.error) { %>
+            <div class="alert alert-danger">
+                <%= messages.error %>
+            </div>
+        <% } %>
+        <% if (messages.success) { %>
+            <div class="alert alert-success">
+                <%= messages.success %>
+            </div>
+        <% } %>
+
+        <% if (announcements.length === 0) { %>
+            <p>No announcements available at this time.</p>
+        <% } else { %>
+            <div class="list-group">
+                <% announcements.forEach(announcement => { %>
+                    <div class="list-group-item">
+                        <h5 class="mb-1"><%= announcement.content %></h5>
+                        <small class="text-muted"><%= new Date(announcement.timestamp).toLocaleString() %></small>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+
+        <div>
+            <a href="/home" class="btn btn-primary mt-3">Back to Home</a>
+        </div>
+    </main>
+    <%- include('templates/footer'); %>
+</body>
+</html>

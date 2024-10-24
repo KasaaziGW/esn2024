@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('templates/head'); %>
+    <title>searchinfo</title>
+</head>
+<body>
+    <%- include('templates/header'); %>
+    <main class="d-flex flex-nowrap" style="height:500px;">
+        <%- include('templates/nav'); %>
+        <div class="search-container">
+            <h2>Search Information</h2>
+            <form id="search-form" action="/search" method="post">
+                <label for="search-criteria"><%= data.fullname %>&nbsp;&nbsp;Enter Your Search Criteria Here:</label>
+                
+                <!-- Flex container for the input and button -->
+                <div class="input-button-container">
+                    <input type="text" id="search-criteria" name="searchCriteria" placeholder="Enter name, ID, or Email" required>
+                    <button type="submit" class="search-button">Search</button>
+                </div>
+            </form>        
+           <!-- Suggestion Box for auto complete -->
+            <div id="suggestion-box"></div>
+            <!-- Area for displaying search results -->
+            <div id="search-results" class="results-container">
+                <h3>Results:</h3>
+               
+                <div id="results-list" class="card">
+                    <div id="status" class="card-item"></div>
+                    <div id="username" class="card-item" hidden></div>
+                    <div id="timestamp" class="card-item" hidden></div>
+                    <div id="messages" hidden></div>                    
+                </div>
+            </div>
+        </div>               
+    </main>
+    <%- include('templates/footer'); %>
+    <script src="js/chat.js"></script>
+
+        <script>// Add an event listener to the search form, listening for the 'submit' event
+            document.getElementById('search-form').addEventListener('submit', async function(event) {
+                // Prevent the default form submission behavior (page reload)
+                event.preventDefault();
+            
+                // Get the value entered by the user in the search input field
+                const searchCriteria = document.getElementById('search-criteria').value;
+            
+                // Check if the search criteria is empty. If so, display an alert and stop the process
+                if (!searchCriteria) {
+                    alert('Please enter search criteria');
+                    return; // Exit the function early if no input is provided
+                }
+            
+                try {
+                    // Send a POST request to the '/search' endpoint on the server
+                    // The request includes the search criteria entered by the user
+                    const response = await fetch('/search', {
+                        method: 'POST',  // HTTP method is POST to send data to the server
+                        headers: {
+                            'Content-Type': 'application/json',  // Set the content type to JSON
+                        },
+                        // Convert the searchCriteria into a JSON string to send it as the request body
+                        body: JSON.stringify({ searchCriteria }),
+                    });
+            
+                    // Parse the response from the server as JSON data
+                    const data = await response.json();
+            
+                    // Clear any previous search results displayed in the results list
+                    const resultsList = document.getElementById('results-list');
+                    resultsList.innerHTML = '';  // Reset the inner HTML to an empty string
+            
+                    // Check if the server responded with a successful status and if there are results
+                    if (data.success && data.results.length > 0) {
+                        // Loop through each result returned by the server
+                        data.results.forEach(result => {
+                            // Create a new <div> element for the username
+                            const usernameItem = document.createElement('div');
+                            usernameItem.textContent = `Username: ${result.username}`;  // Display the citizen's username
+            
+                            // Create a new <div> element for the user's status
+                            const statusItem = document.createElement('div');
+                            // Display the user's status or 'N/A' if the status is not available
+                            statusItem.textContent = `Status: ${result.status || 'N/A'}`;
+            
+                            // Create a new <div> element for the timestamp of the status
+                            const timestampItem = document.createElement('div');
+                            // Display the last time the status was updated or 'N/A' if not available
+                            timestampItem.textContent = `Timestamp: ${result.statusLastUpdated || 'N/A'}`;
+            
+                            // Append the username, status, and timestamp elements to the results list in the DOM
+                            resultsList.appendChild(usernameItem);
+                            resultsList.appendChild(statusItem);
+                            resultsList.appendChild(timestampItem);
+            
+                            // Check if there are messages associated with the user
+                            if (result.messages && result.messages.length > 0) {
+                                // Loop through each message associated with the user
+                                result.messages.forEach(message => {
+                                    // Create a new <div> element for each message
+                                    const messageItem = document.createElement('div');
+                                    // Display the message content and the time it was sent
+                                    messageItem.textContent = `This Message: ${message.message} (Was Sent at: ${message.sentTime})`;
+                                    // Append the message item to the results list in the DOM
+                                    resultsList.appendChild(messageItem);
+                                });
+                            } else {
+                                // If no messages were found, display a message saying so
+                                const noMessagesItem = document.createElement('div');
+                                noMessagesItem.textContent = 'No messages found for this user.';
+                                resultsList.appendChild(noMessagesItem);
+                            }
+                        });
+                    } else {
+                        // If no results were found, display a 'No results found' message
+                        const noResultsItem = document.createElement('div');
+                        noResultsItem.textContent = 'No results found';
+                        resultsList.appendChild(noResultsItem);
+                    }
+            
+                } catch (error) {
+                    // Log any errors that occur during the fetch operation to the console
+                    console.error('Error:', error);
+                }
+            });
+            
+
+    </script>
+
+</body>
+</html>

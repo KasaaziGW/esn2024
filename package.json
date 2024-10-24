@@ -29,5 +29,8 @@
     "mongoose": "^8.6.2",
     "slugify": "^1.6.6",
     "socket.io": "^4.8.0"
+  },
+  "devDependencies": {
+    "npm": "^10.9.0"
   }
 }
