@@ -203,6 +203,7 @@ input[type=password]:placeholder {
     margin-left: -16px;
     margin-top: -6px;
     height: 490px;
+    overflow-y: auto;
 }
 #citizen
 {

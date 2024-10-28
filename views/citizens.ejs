@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <%- include('templates/head'); %>
+        <title>Administrator User Profile</title>
+    </head>
+    <body>
+        <%- include('templates/header'); %>
+        <main class="d-flex flex-nowrap" style="height:500px;">
+            <%- include('templates/nav'); %>
+            <div class="d-flex flex-column flex-shrink-0 p-3" style="width: 1060px;">
+                <div id="content" style="width: 80%; margin:auto;">
+                  <h1>Citzens</h1>
+
+                  <table class="table table-striped table-responsive table-bordered">
+                    <thead class="table-dark">
+                      <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Full Name</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% if (data.citizens.length > 0) { %>
+                        <% data.citizens.forEach((citizen, index) => { %>
+                          <tr>
+                            <th scope="row"><%= index + 1 %></th>
+                            <td><%= citizen.fullname %></td>
+                            <td><%= citizen.username %></td>
+                            <td><%= citizen.status %></td>
+                            <td>
+                              <button type="button" class="btn btn-primary btn-sm me-2">Edit</button>
+                              <button type="button" class="btn btn-danger btn-sm">Delete</button>
+                            </td>
+                          </tr>
+                        <% }); %>
+                      <% } else { %>
+                        <tr>
+                          <td colspan="5" class="text-center">No citizens found.</td>
+                        </tr>
+                      <% } %>
+                    </tbody>
+                  </table>
+                  
+                  
+                
+                  <p id="message"></p>
+                  
+                </div>
+            </div>
+        </main>
+        <%- include('templates/footer'); %>
+    </body>
+</html>
