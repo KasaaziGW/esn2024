@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('templates/head'); %>
+    <title>searchinfo</title>
+</head>
+<body>
+    <%- include('templates/header'); %>
+    <main class="d-flex flex-nowrap" style="height:600px;">
+        <%- include('templates/nav'); %>
+        <div class="admin-dashboard-container">                    
+            <h1>Admin Dashboard</h1>
+            <!-- User Management Section -->
+            <section class="admin-user-management">
+                <h2>User Management</h2>
+                <table class="admin-user-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>johndoe</td>
+                            <td>johndoe@example.com</td>
+                            <td>Admin</td>
+                            <td>Active</td>
+                            <td>
+                                <button class="btn-admin-edit" data-id="1">Edit</button>
+                                <button class="btn-admin-delete" data-id="1">Delete</button>
+                                <button class="btn-admin-deactivate" data-id="1">Deactivate</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>janedoe</td>
+                            <td>janedoe@example.com</td>
+                            <td>Citize</td>
+                            <td>Inactive</td>
+                            <td>
+                                <button class="btn-admin-edit" data-id="2">Edit</button>
+                                <button class="btn-admin-delete" data-id="2">Delete</button>
+                                <button class="btn-admin-deactivate" data-id="2">Deactivate</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Amie Minnah</td>
+                            <td>mimi@example.com</td>
+                            <td>Coordinator</td>
+                            <td>Inactive</td>
+                            <td>
+                                <button class="btn-admin-edit" data-id="2">Edit</button>
+                                <button class="btn-admin-delete" data-id="2">Delete</button>
+                                <button class="btn-admin-deactivate" data-id="2">Deactivate</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Announcements Overview Section -->
+            <section class="admin-announcement-overview">
+                <h2>Announcements Overview</h2>
+                <ul class="admin-announcement-list">
+                    <li class="admin-announcement-item">
+                        <h3>System Update</h3>
+                        <p>The system will undergo maintenance on October 30, 2024.</p>
+                        <span>By: Admin | Posted on: Oct 28, 2024, 10:00 AM</span>
+                        <button class="btn-admin-pin" data-id="1">Pin</button>
+                    </li>
+                </ul>
+            </section>  
+
+        </div>        
+    </main>
+    <%- include('templates/footer'); %>
+    <script src="js/chat.js"></script>
+</body>
+</html>

@@ -618,8 +618,34 @@ app.post('/forward-message/:messageId', async (req, res) => {
 
 
 
+// loading the admindashboard page
+app.get("/admin", (request, response) => {
+  session = request.session;
+  // uname = request.session.fullname;
+  if (session.uid && session.fname) {
+    response.render("admin", {
+      data: {
+        userid: session.uid,
+        fullname: session.fname,
+      },
+    });
+  } else response.redirect("/");
+});
 
 
+// loading the admindashboard page
+app.get("/userprofile", (request, response) => {
+  session = request.session;
+  // uname = request.session.fullname;
+  if (session.uid && session.fname) {
+    response.render("userprofile", {
+      data: {
+        userid: session.uid,
+        fullname: session.fname,
+      },
+    });
+  } else response.redirect("/");
+});
 
 
 

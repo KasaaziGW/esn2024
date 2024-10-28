@@ -6,7 +6,7 @@
 </head>
 <body>
     <%- include('templates/header'); %>
-    <main class="d-flex flex-nowrap" style="height:800px;">
+    <main class="d-flex flex-nowrap" style="height:600px;">
         <%- include('templates/nav'); %>
         <div class="search-container">
             <h2>Search Information</h2>
@@ -36,7 +36,8 @@
     <%- include('templates/footer'); %>
     <script src="js/chat.js"></script>
 
-        <script>// Add an event listener to the search form, listening for the 'submit' event
+        <script>
+        // Add an event listener to the search form, listening for the 'submit' event
             document.getElementById('search-form').addEventListener('submit', async function(event) {
                 // Prevent the default form submission behavior (page reload)
                 event.preventDefault();
