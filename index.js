@@ -130,6 +130,24 @@ app.post("/processLogin", (request, response) => {
     );
     response.redirect("/");
   }
+
+  // logging in as admin
+app.post("/processLogin", (request, response) => {
+  // getting the data from the administrator
+  let username = request.body.username;
+  let pswd = request.body.password;
+  if (username === "") {
+    request.flash("error", "User not found!! Please try again.");
+    response.redirect("/");
+  }
+  if (pswd === "") {
+    request.flash(
+      "error",
+      "The password field must be filled too! Please try again."
+    );
+    response.redirect("/");
+  }
+  
   // check if the user exists
   Citizen.findOne({ username: email })
     .then((userInfo) => {
@@ -164,6 +182,19 @@ app.post("/processLogin", (request, response) => {
 app.get("/home", (request, response) => {
   if (session.uid && session.fname) {
     response.render("dashboard", {
+      data: {
+        userid: session.uid,
+        fullname: session.fname,
+      },
+    });
+  } else {
+    response.redirect("/");
+  }
+});
+// loading the admin-dashboard
+app.get("/admin", (request, response) => {
+  if (session.uid && session.fname) {
+    response.render("admin-dashboard", {
       data: {
         userid: session.uid,
         fullname: session.fname,
