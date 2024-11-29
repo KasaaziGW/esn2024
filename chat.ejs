@@ -1,0 +1,26 @@
+<% include ./common/header %>
+    <div class="container">
+   <center><h3>Welcome to PrivateChat Group 2</h3></center>
+   <hr>
+   <div class="row">
+    <div class="col-md-3" id="userOnline">
+      <div class="userOnline text-center" >People</div>
+    </div>
+    <div class="col-md-9">
+      <div class="well">
+          <strong>Welcome <%= username %></strong>
+          <a href="/auth/signout" class="btn btn-primary btn-sm float-right">Logout</a>
+      </div>
+       <br>
+       <h4>You can chat with <%= partner %></h4>
+      <div class="chat"></div>
+       <form class="form">
+         <div class="form-group">
+            <textarea name="chatMessage" class="form-control messageSend"></textarea>
+            <button name="postMessage" class="btn btn-success btn-sm" >Send Message</button>
+         </div>
+       </form>
+    </div>
+   </div>
+ </div>
+<% include ./common/footer %>
